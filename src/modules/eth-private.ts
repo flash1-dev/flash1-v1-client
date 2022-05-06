@@ -46,7 +46,7 @@ export default class EthPrivate {
     signingMethod: SigningMethod,
     data: {} = {},
   ): Promise<Data> {
-    const requestPath: string = `/v1/${endpoint}`;
+    const requestPath: string = `/api/v1/private/${endpoint}`;
     const timestamp: ISO8601 = this.clock.getAdjustedIsoString();
     const body: string = JSON.stringify(data);
     const signature: string = await this.actionSigner.sign(
@@ -108,7 +108,7 @@ export default class EthPrivate {
   async createApiKey(
     ethereumAddress: string,
     signingMethod: SigningMethod = SigningMethod.Hash,
-  ): Promise<{ apiKey: ApiKeyCredentials }> {
+  ): Promise<ApiKeyCredentials> {
     return this.post('api-keys', ethereumAddress, signingMethod);
   }
 
