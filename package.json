@@ -1,6 +1,6 @@
 {
   "name": "@flash1/v1-client",
-  "version": "1.8.2",
+  "version": "1.0.0",
   "description": "Trading client library for flash1",
   "main": "build/src/index.js",
   "scripts": {
@@ -37,5 +37,9 @@
     "pretty-format": "^28.0.2",
     "ts-jest": "^27.1.4",
     "ts-node": "^10.7.0"
+  },
+  "engines": {
+    "npm": "~8.5.2",
+    "node": "~16.14.2"
   }
 }
