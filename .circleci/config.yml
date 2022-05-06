@@ -42,7 +42,7 @@ workflows:
       - build_and_test:
           context:
             - aws
-      - deploy:
+      - publish:
           requires:
             - build_and_test
           filters:
