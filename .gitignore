@@ -18,4 +18,4 @@ npm-debug.log
 *.swp
 
 # local testing
-__tests__/local/
+tests/local/

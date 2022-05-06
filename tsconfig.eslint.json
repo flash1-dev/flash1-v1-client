@@ -2,7 +2,7 @@
   "extends": "./tsconfig.json",
   "include": [
     // Repeat included files from tsconfig.json.
-    "__tests__",
+    "tests",
     "scripts",
     "src",
     "examples",
