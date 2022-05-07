@@ -46,7 +46,7 @@ describe('API Keys Module & Private Module', () => {
 
     expect(axios).toHaveBeenCalledTimes(1);
     expect(axios).toHaveBeenCalledWith({
-      url: expect.stringContaining('/v1/api-keys'),
+      url: expect.stringContaining('/api/v1/private/api-keys'),
       method: 'DELETE',
       headers: {
         'FLASH1-SIGNATURE': expect.stringMatching(/0x[0-9a-f]{130}/),
