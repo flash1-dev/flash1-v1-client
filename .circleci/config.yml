@@ -30,10 +30,16 @@ jobs:
       - run:
           name: Authenticate with registry
           command: echo "//registry.npmjs.org/:_authToken=$NPM_TOKEN" > ~/.npmrc
+      - add_ssh_keys:
+          fingerprints:
+            - "16:9e:a7:be:95:e6:41:ad:a2:ab:ed:b6:3f:55:a9:ae"
       - run:
-          name: Publish package
-          command: npm publish
-
+          name: Build package
+          command: yarn && yarn build
+      - run:
+          command: |
+            ./scripts/publish_if_not_exists.sh
+  
 # Invoke jobs via workflows
 # See: https://circleci.com/docs/2.0/configuration-reference/#workflows
 workflows:
