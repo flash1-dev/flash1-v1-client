@@ -13,7 +13,7 @@ then
 	git config credential.helper 'cache --timeout=120'
 	git config user.email "circleci@flash1.com"
 	git config user.name "CircleCI Job"
-	git add $(BACKEND_CHART_FILE_PATH)
+	git add .
 	git commit --allow-empty -m "[skip ci] Publish to NPM via CircleCI"
 
     # Get version and tag

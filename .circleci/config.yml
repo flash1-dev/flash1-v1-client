@@ -32,7 +32,7 @@ jobs:
           command: echo "//registry.npmjs.org/:_authToken=$NPM_TOKEN" > ~/.npmrc
       - add_ssh_keys:
           fingerprints:
-            - "16:9e:a7:be:95:e6:41:ad:a2:ab:ed:b6:3f:55:a9:ae"
+            - "d9:84:7b:04:f8:bd:a2:35:34:7d:33:05:19:de:b7:3b"
       - run:
           name: Build package
           command: yarn && yarn build
