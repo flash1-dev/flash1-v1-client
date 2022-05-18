@@ -5,6 +5,7 @@
 /* eslint-disable no-console */
 /* eslint-disable @typescript-eslint/no-floating-promises */
 import { ethers } from 'ethers';
+import WebSocket from 'ws';
 
 import { Flash1Client, ClientOptions } from '../src/flash1-client';
 import { RequestMethod } from '../src/lib/axios';
