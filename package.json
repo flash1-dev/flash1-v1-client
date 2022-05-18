@@ -1,6 +1,6 @@
 {
   "name": "@flash1-exchange/v1-client",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "description": "Trading client library for flash1",
   "main": "./build/src/index.js",
   "types": "./build/src/index.d.ts",

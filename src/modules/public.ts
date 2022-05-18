@@ -39,7 +39,7 @@ export default class Public {
   ): Promise<Data> {
     return axiosRequest({
       method: 'GET',
-      url: `${this.host}/v1/${generateQueryPath(requestPath, params)}`,
+      url: `${this.host}/api/v1/public/${generateQueryPath(requestPath, params)}`,
     });
   }
 
@@ -48,7 +48,7 @@ export default class Public {
     data: {},
   ): Promise<Data> {
     return axiosRequest({
-      url: `${this.host}/v1/${requestPath}`,
+      url: `${this.host}/api/v1/public/${requestPath}`,
       method: 'PUT',
       data,
     });
