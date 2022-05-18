@@ -1,8 +1,9 @@
 {
   "name": "@flash1-exchange/v1-client",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "Trading client library for flash1",
   "main": "build/src/index.js",
+  "types": "build/src/index.d.ts",
   "scripts": {
     "build": "rm -rf build/ && npm run compile",
     "compile": "tsc",
