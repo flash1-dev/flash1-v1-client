@@ -1,14 +1,16 @@
-import { Decimal } from '@dydxprotocol/starkex-eth';
+// import { Decimal } from '@dydxprotocol/starkex-eth';
 import {
   DydxAsset,
   DydxMarket,
   StarkwareOrderSide,
-} from '@dydxprotocol/starkex-lib';
+} from '@flash1-exchange/starkex-lib';
 import BigNumber from 'bignumber.js';
 import { Wallet, VoidSigner, Signer as EthersSigner } from 'ethers';
-import { HttpProvider, IpcProvider, WebsocketProvider } from 'web3-core';
+// import { HttpProvider, IpcProvider, WebsocketProvider } from 'web3-core';
 
-export { Account as EthereumAccount } from 'web3-core';
+type Decimal = unknown; // TODO: temp fix
+
+// export { Account as EthereumAccount } from 'web3-core';
 
 export type Signer = EthersSigner | Wallet | VoidSigner;
 
@@ -20,7 +22,7 @@ export type Address = string;
 
 export type Integer = BigNumber;
 
-export type Provider = HttpProvider | IpcProvider | WebsocketProvider;
+export type Provider = unknown;
 
 export type PositionsMap = { [market: string]: PositionResponseObject };
 
@@ -31,7 +33,8 @@ export type GenericParams = { [name: string]: any };
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type Data = any;
 
-export { SendOptions as EthereumSendOptions } from '@dydxprotocol/starkex-eth';
+// export { SendOptions as EthereumSendOptions } from '@dydxprotocol/starkex-eth';
+export type EthereumSendOptions = unknown;
 
 // ============ Credentials ============
 

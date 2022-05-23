@@ -1,4 +1,4 @@
-import { ApiMethod } from '@dydxprotocol/starkex-lib';
+import { ApiMethod } from '@flash1-exchange/starkex-lib';
 import _ from 'lodash';
 
 import { SignEthPrivateAction } from '../eth-signing';

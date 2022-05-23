@@ -4,6 +4,7 @@
 
 import axios, { AxiosResponse } from 'axios';
 import { ethers } from 'ethers';
+
 import { ApiKeyCredentials, Flash1Client } from '../src';
 import { RequestMethod } from '../src/lib/axios';
 import { asMock } from './helpers/util';
