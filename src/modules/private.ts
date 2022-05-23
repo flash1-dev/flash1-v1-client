@@ -1,6 +1,4 @@
-import crypto from 'crypto';
-
-import { StarkwareLib } from '@dydxprotocol/starkex-eth';
+// import { StarkwareLib } from '@dydxprotocol/starkex-eth';
 import {
   ApiMethod,
   KeyPair,
@@ -9,11 +7,8 @@ import {
   SignableWithdrawal,
   asEcKeyPair,
   asSimpleKeyPair,
-  SignableConditionalTransfer,
-  SignableTransfer,
-  nonceFromClientId,
-  TransferParams as StarklibTransferParams,
-} from '@dydxprotocol/starkex-lib';
+} from '@flash1-exchange/starkex-lib';
+import crypto from 'crypto-js';
 import _ from 'lodash';
 
 import { generateQueryPath, generateRandomClientId } from '../helpers/request-helpers';
@@ -27,11 +22,8 @@ import {
   AccountLeaderboardPnlPeriod,
   AccountLeaderboardPnlResponseObject,
   AccountResponseObject,
-  ApiFastWithdrawal,
-  ApiFastWithdrawalParams,
   ApiKeyCredentials,
   ApiOrder,
-  ApiTransfer,
   ApiWithdrawal,
   Data,
   FillResponseObject,
@@ -49,10 +41,8 @@ import {
   PartialBy,
   PositionResponseObject,
   PositionStatus,
-  Provider,
   RetroactiveMiningRewardsResponseObject,
   TradingRewardsResponseObject,
-  TransferParams,
   TransferResponseObject,
   UserResponseObject,
   ActiveOrderResponseObject,
@@ -71,13 +61,13 @@ const METHOD_ENUM_MAP: Record<RequestMethod, ApiMethod> = {
   [RequestMethod.PUT]: ApiMethod.PUT,
 };
 
-const collateralTokenDecimals = 6;
+// const collateralTokenDecimals = 6;
 
 export default class Private {
   readonly host: string;
   readonly apiKeyCredentials: ApiKeyCredentials;
   readonly networkId: number;
-  readonly starkLib: StarkwareLib;
+  // readonly starkLib: StarkwareLib;
   readonly starkKeyPair?: KeyPair;
   readonly clock: Clock;
 
@@ -97,7 +87,7 @@ export default class Private {
     this.host = host;
     this.apiKeyCredentials = apiKeyCredentials;
     this.networkId = networkId;
-    this.starkLib = new StarkwareLib({} as Provider, networkId);
+    // this.starkLib = new StarkwareLib({} as Provider, networkId);
     if (starkPrivateKey) {
       this.starkKeyPair = asSimpleKeyPair(asEcKeyPair(starkPrivateKey));
     }
@@ -662,53 +652,53 @@ export default class Private {
     * @signature starkware specific signature for fast-withdrawal
     * }
     */
-  async createFastWithdrawal(
-    {
-      lpStarkKey,
-      ...params
-    }: PartialBy<ApiFastWithdrawalParams, 'clientId' | 'signature'>,
-    positionId: string,
-  ): Promise<{ withdrawal: TransferResponseObject }> {
-    const clientId = params.clientId || generateRandomClientId();
-    let signature: string | undefined = params.signature;
-    if (!signature) {
-      if (!this.starkKeyPair) {
-        throw new Error('Fast withdrawal is not signed and client was not initialized with starkPrivateKey');
-      }
-      const fact = this.starkLib.factRegistry.getTransferErc20Fact({
-        recipient: params.toAddress,
-        tokenAddress: this.starkLib.collateralToken.getAddress(),
-        tokenDecimals: collateralTokenDecimals,
-        humanAmount: params.creditAmount,
-        salt: nonceFromClientId(clientId),
-      });
-      const transferToSign = {
-        senderPositionId: positionId,
-        receiverPositionId: params.lpPositionId,
-        receiverPublicKey: lpStarkKey,
-        factRegistryAddress: this.starkLib.factRegistry.getAddress(),
-        fact,
-        humanAmount: params.debitAmount,
-        clientId,
-        expirationIsoTimestamp: params.expiration,
-      };
-      const starkConditionalTransfer = SignableConditionalTransfer.fromTransfer(
-        transferToSign,
-        this.networkId,
-      );
-      signature = await starkConditionalTransfer.sign(this.starkKeyPair);
-    }
-    const fastWithdrawal: ApiFastWithdrawal = {
-      ...params,
-      clientId,
-      signature,
-    };
+  // async createFastWithdrawal(
+  //   {
+  //     lpStarkKey,
+  //     ...params
+  //   }: PartialBy<ApiFastWithdrawalParams, 'clientId' | 'signature'>,
+  //   positionId: string,
+  // ): Promise<{ withdrawal: TransferResponseObject }> {
+  //   const clientId = params.clientId || generateRandomClientId();
+  //   let signature: string | undefined = params.signature;
+  //   if (!signature) {
+  //     if (!this.starkKeyPair) {
+  //       throw new Error('Fast withdrawal is not signed and client was not initialized with starkPrivateKey');
+  //     }
+  //     const fact = this.starkLib.factRegistry.getTransferErc20Fact({
+  //       recipient: params.toAddress,
+  //       tokenAddress: this.starkLib.collateralToken.getAddress(),
+  //       tokenDecimals: collateralTokenDecimals,
+  //       humanAmount: params.creditAmount,
+  //       salt: nonceFromClientId(clientId),
+  //     });
+  //     const transferToSign = {
+  //       senderPositionId: positionId,
+  //       receiverPositionId: params.lpPositionId,
+  //       receiverPublicKey: lpStarkKey,
+  //       factRegistryAddress: this.starkLib.factRegistry.getAddress(),
+  //       fact,
+  //       humanAmount: params.debitAmount,
+  //       clientId,
+  //       expirationIsoTimestamp: params.expiration,
+  //     };
+  //     const starkConditionalTransfer = SignableConditionalTransfer.fromTransfer(
+  //       transferToSign,
+  //       this.networkId,
+  //     );
+  //     signature = await starkConditionalTransfer.sign(this.starkKeyPair);
+  //   }
+  //   const fastWithdrawal: ApiFastWithdrawal = {
+  //     ...params,
+  //     clientId,
+  //     signature,
+  //   };
 
-    return this.post(
-      'fast-withdrawals',
-      fastWithdrawal,
-    );
-  }
+  //   return this.post(
+  //     'fast-withdrawals',
+  //     fastWithdrawal,
+  //   );
+  // }
 
   /**
      * @description post a new transfer
@@ -723,44 +713,44 @@ export default class Private {
       * }
       * @param positionId specifies the associated position for the transfer
       */
-  async createTransfer(
-    params: PartialBy<TransferParams, 'clientId' | 'signature'>,
-    positionId: string,
-  ): Promise<{ transfer: TransferResponseObject }> {
-    const clientId = params.clientId || generateRandomClientId();
+  // async createTransfer(
+  //   params: PartialBy<TransferParams, 'clientId' | 'signature'>,
+  //   positionId: string,
+  // ): Promise<{ transfer: TransferResponseObject }> {
+  //   const clientId = params.clientId || generateRandomClientId();
 
-    let signature: string | undefined = params.signature;
-    if (!signature) {
-      if (!this.starkKeyPair) {
-        throw new Error(
-          'Transfer is not signed and client was not initialized with starkPrivateKey',
-        );
-      }
-      const transferToSign: StarklibTransferParams = {
-        humanAmount: params.amount,
-        expirationIsoTimestamp: params.expiration,
-        receiverPositionId: params.receiverPositionId,
-        senderPositionId: positionId,
-        receiverPublicKey: params.receiverPublicKey,
-        clientId,
-      };
-      const starkTransfer = SignableTransfer.fromTransfer(transferToSign, this.networkId);
-      signature = await starkTransfer.sign(this.starkKeyPair);
-    }
+  //   let signature: string | undefined = params.signature;
+  //   if (!signature) {
+  //     if (!this.starkKeyPair) {
+  //       throw new Error(
+  //         'Transfer is not signed and client was not initialized with starkPrivateKey',
+  //       );
+  //     }
+  //     const transferToSign: StarklibTransferParams = {
+  //       humanAmount: params.amount,
+  //       expirationIsoTimestamp: params.expiration,
+  //       receiverPositionId: params.receiverPositionId,
+  //       senderPositionId: positionId,
+  //       receiverPublicKey: params.receiverPublicKey,
+  //       clientId,
+  //     };
+  //     const starkTransfer = SignableTransfer.fromTransfer(transferToSign, this.networkId);
+  //     signature = await starkTransfer.sign(this.starkKeyPair);
+  //   }
 
-    const transfer: ApiTransfer = {
-      amount: params.amount,
-      receiverAccountId: params.receiverAccountId,
-      clientId,
-      signature,
-      expiration: params.expiration,
-    };
+  //   const transfer: ApiTransfer = {
+  //     amount: params.amount,
+  //     receiverAccountId: params.receiverAccountId,
+  //     clientId,
+  //     signature,
+  //     expiration: params.expiration,
+  //   };
 
-    return this.post(
-      'transfers',
-      transfer,
-    );
-  }
+  //   return this.post(
+  //     'transfers',
+  //     transfer,
+  //   );
+  // }
 
   /**
    * @description get a user's funding payments by a set of query parameters
@@ -977,10 +967,10 @@ export default class Private {
       requestPath +
       (_.isEmpty(data) ? '' : JSON.stringify(data))
     );
-
-    return crypto.createHmac(
-      'sha256',
-      Buffer.from(this.apiKeyCredentials.secret, 'base64'),
-    ).update(messageString).digest('base64');
+    const hmac = crypto.algo.HMAC.create(
+      crypto.algo.SHA256,
+      crypto.enc.Base64url.parse(this.apiKeyCredentials.secret),
+    );
+    return hmac.update(messageString).finalize().toString(crypto.enc.Base64);
   }
 }

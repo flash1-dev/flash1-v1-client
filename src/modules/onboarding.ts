@@ -1,7 +1,7 @@
 import {
   KeyPairWithYCoordinate,
   keyPairFromData,
-} from '@dydxprotocol/starkex-lib';
+} from '@flash1-exchange/starkex-lib';
 
 import { SignOnboardingAction } from '../eth-signing';
 import { stripHexPrefix } from '../eth-signing/helpers';

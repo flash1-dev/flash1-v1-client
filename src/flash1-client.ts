@@ -1,5 +1,5 @@
-import { StarkwareLib } from '@dydxprotocol/starkex-eth';
-import { KeyPair } from '@dydxprotocol/starkex-lib';
+// import { StarkwareLib } from '@dydxprotocol/starkex-eth';
+import { KeyPair } from '@flash1-exchange/starkex-lib';
 
 import Clock from './modules/clock';
 import EthPrivate from './modules/eth-private';
@@ -21,6 +21,8 @@ export interface ClientOptions {
   apiKeyCredentials?: ApiKeyCredentials;
   timestampAdjustment?: number;
 }
+
+type StarkwareLib = unknown;
 
 export class Flash1Client {
   readonly host: string;
@@ -131,8 +133,8 @@ export class Flash1Client {
     return this._onboarding;
   }
 
-  /******************
-   
+  /** ****************
+
    TODO: FIX THIS
   /****************** */
   /**
