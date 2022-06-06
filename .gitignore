@@ -19,3 +19,5 @@ npm-debug.log
 
 # local testing
 tests/local/
+
+dist

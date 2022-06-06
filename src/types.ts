@@ -675,6 +675,15 @@ export interface ProfilePrivateResponseObject extends ProfilePublicResponseObjec
   },
 }
 
+export interface KeyPair {
+  publicKey: string;
+  publicKeyYCoordinate?: string;
+  privateKey: string;
+}
+export interface KeyPairWithYCoordinate extends KeyPair {
+  publicKeyYCoordinate: string;
+}
+
 // ============ API Response Field Types ============
 
 enum MarketStatus {

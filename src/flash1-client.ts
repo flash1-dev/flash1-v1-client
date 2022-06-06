@@ -1,6 +1,3 @@
-// import { StarkwareLib } from '@dydxprotocol/starkex-eth';
-import { KeyPair } from '@flash1-exchange/starkex-lib';
-
 import Clock from './modules/clock';
 import EthPrivate from './modules/eth-private';
 import Onboarding from './modules/onboarding';
@@ -10,6 +7,7 @@ import {
   ApiKeyCredentials,
   EthereumSendOptions,
   Signer,
+  KeyPair,
 } from './types';
 
 export interface ClientOptions {

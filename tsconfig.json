@@ -1,28 +1,14 @@
 {
   "compilerOptions": {
-    "target": "ES2019",
-    "module": "CommonJS",
-    "outDir": "build",
-    "lib": [
-      "es2015",
-      "es2016",
-      "es2017",
-      "es2018",
-      "es2019"
-    ],
-    "declaration": true,
+    "typeRoots": ["@types", "./node_modules/@types"],
+    "module": "es6",
+    "target": "es5",
+    "noImplicitAny": true,
+    "moduleResolution": "node",
+    "sourceMap": false,
+    "outDir": "dist",
     "esModuleInterop": true,
-    "forceConsistentCasingInFileNames": true,
-    "inlineSourceMap": true,
-    "noFallthroughCasesInSwitch": false,
-    "noImplicitReturns": true,
-    "resolveJsonModule": true,
-    "strict": true,
-    "useUnknownInCatchVariables": false
-  },
-  "include": [
-    "src",
-    "examples"
-  ],
-  "compileOnSave": true,
+    "baseUrl": "./",
+    "declaration": true
+  }
 }
