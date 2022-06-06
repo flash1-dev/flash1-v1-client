@@ -4,6 +4,7 @@ import {
   DydxMarket,
   StarkwareOrderSide,
 } from '@flash1-exchange/starkex-lib';
+import { RequestMethod } from 'axios'
 import BigNumber from 'bignumber.js';
 import { Wallet, VoidSigner, Signer as EthersSigner } from 'ethers';
 // import { HttpProvider, IpcProvider, WebsocketProvider } from 'web3-core';
@@ -11,6 +12,8 @@ import { Wallet, VoidSigner, Signer as EthersSigner } from 'ethers';
 type Decimal = unknown; // TODO: temp fix
 
 // export { Account as EthereumAccount } from 'web3-core';
+
+export type RequestMethod = RequestMethod;
 
 export type Signer = EthersSigner | Wallet | VoidSigner;
 
