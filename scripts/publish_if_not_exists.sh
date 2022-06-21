@@ -18,9 +18,7 @@ then
 
     # Get version and tag
     git tag v${VERSION}
-    git push --tags
-
-    yarn publish --access public
 else
     echo "skipping publish, package $NAME@$VERSION already published"
+    exit 1
 fi
