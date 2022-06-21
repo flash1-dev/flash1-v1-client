@@ -45,6 +45,7 @@
     "@types/webpack-dev-server": "^4.7.2",
     "@types/ws": "^8.5.3",
     "babel-loader": "^8.2.5",
+    "buffer": "^6.0.3",
     "jest": "^27.5.1",
     "pretty-format": "^28.0.2",
     "ts-jest": "^27.1.4",
