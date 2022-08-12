@@ -1,11 +1,12 @@
 // import { Decimal } from '@dydxprotocol/starkex-eth';
 import {
-  DydxAsset,
-  DydxMarket,
+  Flash1Asset,
+  Flash1Market,
   StarkwareOrderSide,
 } from '@flash1-exchange/starkex-lib';
 import BigNumber from 'bignumber.js';
 import { Wallet, VoidSigner, Signer as EthersSigner } from 'ethers';
+import { StringNullableChain } from 'lodash';
 // import { HttpProvider, IpcProvider, WebsocketProvider } from 'web3-core';
 
 type Decimal = unknown; // TODO: temp fix
@@ -47,10 +48,10 @@ export interface ApiKeyCredentials {
 
 // ============ Enums ============
 
-export type Market = DydxMarket;
-export const Market = DydxMarket;
-export type Asset = DydxAsset;
-export const Asset = DydxAsset;
+export type ListedMarket = Flash1Market;
+export const ListedMarket = Flash1Market;
+export type TradableAsset = Flash1Asset;
+export const TradableAsset = Flash1Asset;
 export type OrderSide = StarkwareOrderSide;
 export const OrderSide = StarkwareOrderSide;
 
@@ -77,29 +78,33 @@ export enum CandleResolution {
 export enum OrderType {
   LIMIT = 'LIMIT',
   MARKET = 'MARKET',
-  STOP_LIMIT = 'STOP_LIMIT',
-  TRAILING_STOP = 'TRAILING_STOP',
-  TAKE_PROFIT = 'TAKE_PROFIT',
+  TIME_LIMITED = 'TIME-LIMITED',
+  /*
+    below are not yet supported
+  */
+  // STOP_LIMIT = 'STOP_LIMIT',
+  // TRAILING_STOP = 'TRAILING_STOP',
+  // TAKE_PROFIT = 'TAKE_PROFIT',
 }
 
 export enum TimeInForce {
-  GTT = 'GTT',
+  GTC = 'GTC',
   FOK = 'FOK',
   IOC = 'IOC',
 }
 
 export enum PositionStatus {
-  OPEN = 'OPEN',
-  CLOSED = 'CLOSED',
-  LIQUIDATED = 'LIQUIDATED',
+  OPEN = 'Open',
+  CLOSED = 'Closed',
+  SELF_TRADING = 'Canceled, Self-trading'
 }
 
 export enum OrderStatus {
-  PENDING = 'PENDING',
-  OPEN = 'OPEN',
-  FILLED = 'FILLED',
-  CANCELED = 'CANCELED',
-  UNTRIGGERED = 'UNTRIGGERED',
+  OPEN = 'Open',
+  FILLED = 'Filled',
+  MODIFIED_OPEN = 'Modified, Open',
+  CANCELED = 'Canceled',
+  PARTIALLY_CANCELED = 'PartiallyCanceled, Open',
 }
 
 export enum AccountAction {
@@ -185,23 +190,20 @@ interface ApiStarkwareSigned {
 }
 
 export interface ApiOrder extends ApiStarkwareSigned {
-  market: Market;
+  instrument: ListedMarket;
   side: OrderSide;
   type: OrderType;
-  size: string;
+  quantity: string;
   price: string;
-  clientId: string;
   timeInForce: TimeInForce;
   postOnly: boolean;
+  hidden: boolean;
   limitFee: string;
-  cancelId?: string;
-  triggerPrice?: string;
-  trailingPercent?: string;
 }
 
 export interface ApiWithdrawal extends ApiStarkwareSigned {
   amount: string;
-  asset: Asset;
+  asset: TradableAsset;
   clientId: string;
 }
 
@@ -235,10 +237,10 @@ export interface ApiFastWithdrawalParams extends ApiFastWithdrawal {
 // ============ API Response Types ============
 
 export interface MarketResponseObject {
-  market: Market;
+  market: ListedMarket;
   status: MarketStatus;
-  baseAsset: Asset;
-  quoteAsset: Asset;
+  baseAsset: TradableAsset;
+  quoteAsset: TradableAsset;
   tickSize: string;
   indexPrice: string;
   oraclePrice: string;
@@ -266,7 +268,7 @@ export interface MarketsResponseObject {
 }
 
 export interface MarketStatisticResponseObject {
-  market: Market;
+  market: ListedMarket;
   open: string;
   high: string;
   low: string;
@@ -281,7 +283,7 @@ export interface OrderResponseObject {
   id: string;
   clientId?: string;
   accountId: string;
-  market: Market;
+  market: ListedMarket;
   side: OrderSide;
   price: string;
   triggerPrice?: string | null;
@@ -303,12 +305,12 @@ export interface ActiveOrderResponseObject {
   accountId: string;
   remainingSize: string;
   price: string;
-  market: Market;
+  market: ListedMarket;
   side: OrderSide;
 }
 
 export interface PositionResponseObject {
-  market: Market;
+  market: ListedMarket;
   status: PositionStatus;
   side: string;
   size: string;
@@ -329,7 +331,7 @@ export interface FillResponseObject {
   side: OrderSide;
   liquidity: string;
   type: OrderType;
-  market: Market;
+  market: ListedMarket;
   price: string;
   size: string;
   fee: string;
@@ -373,8 +375,8 @@ export interface AccountResponseObject {
 export interface TransferResponseObject {
   id: string;
   type: string;
-  debitAsset: Asset
-  creditAsset: Asset;
+  debitAsset: TradableAsset
+  creditAsset: TradableAsset;
   debitAmount: string;
   creditAmount: string;
   transactionHash?: string;
@@ -387,16 +389,18 @@ export interface TransferResponseObject {
 }
 
 export interface FundingResponseObject {
-  market: Market;
-  payment: string;
-  rate: string;
-  positionSize: string;
-  price: string;
-  effectiveAt: ISO8601;
+  txid: string;
+  positionID: string;
+  userID: Integer;
+  instrument: string;
+  amount: number;
+  fees: number;
+  netAnnualizedRate: number;
+  timestamp: ISO8601;
 }
 
 export interface HistoricalFundingResponseObject {
-  market: Market;
+  market: ListedMarket;
   rate: string;
   price: string;
   effectiveAt: ISO8601;
@@ -423,7 +427,7 @@ export interface OrderbookResponseObject {
 export interface CandleResponseObject {
   startedAt: ISO8601;
   updatedAt: ISO8601;
-  market: Market;
+  market: ListedMarket;
   resolution: CandleResolution;
   low: string;
   high: string;
@@ -601,7 +605,7 @@ export interface LiquidityProviderRewardsResponseObject {
 }
 
 export interface LiquidityRewards {
-  market: Market,
+  market: ListedMarket,
   uptime: string,
   score: string,
   totalScore: string,

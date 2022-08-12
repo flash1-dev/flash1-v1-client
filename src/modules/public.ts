@@ -8,7 +8,7 @@ import {
   Data,
   HistoricalFundingResponseObject,
   ISO8601,
-  Market,
+  ListedMarket,
   MarketsResponseObject,
   MarketStatisticDay,
   MarketStatisticResponseObject,
@@ -85,7 +85,7 @@ export default class Public {
    *
    * @param market if only one market should be returned
    */
-  getMarkets(market?: Market): Promise<{ markets: MarketsResponseObject }> {
+  getMarkets(market?: ListedMarket): Promise<{ markets: MarketsResponseObject }> {
     const uri: string = 'markets';
     return this.get(uri, { market });
   }
@@ -95,7 +95,7 @@ export default class Public {
    *
    * @param market being queried
    */
-  getOrderBook(market: Market): Promise<OrderbookResponseObject> {
+  getOrderBook(market: ListedMarket): Promise<OrderbookResponseObject> {
     return this.get(`orderbook/${market}`, {});
   }
 
@@ -111,7 +111,7 @@ export default class Public {
     market,
     days,
   }: {
-    market?: Market,
+    market?: ListedMarket,
     days?: MarketStatisticDay,
   }): Promise<{ markets: MarketStatisticResponseObject }> {
     const uri: string = market !== undefined
@@ -130,7 +130,7 @@ export default class Public {
     market,
     startingBeforeOrAt,
   }: {
-    market: Market,
+    market: ListedMarket,
     startingBeforeOrAt?: ISO8601,
   }): Promise<{ trades: Trade[] }> {
     const uri: string = `trades/${market}`;
@@ -147,7 +147,7 @@ export default class Public {
     market,
     effectiveBeforeOrAt,
   }: {
-    market: Market,
+    market: ListedMarket,
     effectiveBeforeOrAt?: ISO8601,
   }): Promise<{ historicalFunding: HistoricalFundingResponseObject[] }> {
     const uri: string = `historical-funding/${market}`;
@@ -191,7 +191,7 @@ export default class Public {
     toISO,
     limit,
   }: {
-    market: Market,
+    market: ListedMarket,
     resolution?: CandleResolution,
     fromISO?: ISO8601,
     toISO?: ISO8601,

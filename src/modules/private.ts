@@ -33,7 +33,7 @@ import {
   ISO8601,
   ISO31661ALPHA2,
   LiquidityProviderRewardsResponseObject,
-  Market,
+  ListedMarket,
   OrderResponseObject,
   OrderSide,
   OrderStatus,
@@ -183,6 +183,7 @@ export default class Private {
     );
   }
 
+  // Not yet supported
   /**
    * @description update information for the user
    *
@@ -195,54 +196,54 @@ export default class Private {
    * @country for the user (ISO 3166-1 Alpha-2 Compliant)
    * }
    */
-  async updateUser({
-    userData,
-    email,
-    username,
-    isSharingUsername,
-    isSharingAddress,
-    country,
-  }: {
-    userData: {},
-    email?: string | null,
-    username?: string,
-    isSharingUsername?: boolean,
-    isSharingAddress?: boolean,
-    country?: ISO31661ALPHA2,
-  }): Promise<{ user: UserResponseObject }> {
-    return this.put(
-      'users',
-      {
-        email,
-        username,
-        isSharingUsername,
-        isSharingAddress,
-        userData: JSON.stringify(userData),
-        country,
-      },
-    );
-  }
+  // async updateUser({
+  //   userData,
+  //   email,
+  //   username,
+  //   isSharingUsername,
+  //   isSharingAddress,
+  //   country,
+  // }: {
+  //   userData: {},
+  //   email?: string | null,
+  //   username?: string,
+  //   isSharingUsername?: boolean,
+  //   isSharingAddress?: boolean,
+  //   country?: ISO31661ALPHA2,
+  // }): Promise<{ user: UserResponseObject }> {
+  //   return this.put(
+  //     'users',
+  //     {
+  //       email,
+  //       username,
+  //       isSharingUsername,
+  //       isSharingAddress,
+  //       userData: JSON.stringify(userData),
+  //       country,
+  //     },
+  //   );
+  // }
 
-  /**
-   * @description create an account for an ethereumAddress
-   *
-   * @param starkKey for the account that will be used as the public key in starkwareEx-Lib requests
-   * going forward for this account.
-   * @param starkKeyYCoordinate for the account that will be used as the Y coordinate for the public
-   * key in starkwareEx-Lib requests going forward for this account.
-   */
-  async createAccount(
-    starkKey: string,
-    starkKeyYCoordinate: string,
-  ): Promise<{ account: AccountResponseObject }> {
-    return this.post(
-      'accounts',
-      {
-        starkKey,
-        starkKeyYCoordinate,
-      },
-    );
-  }
+  // /**
+  //  * @description create an account for an ethereumAddress
+  //  *
+  //  * @param starkKey for the account that will be used as the public key in starkwareEx-Lib requests
+  //  * going forward for this account.
+  //  * @param starkKeyYCoordinate for the account that will be used as the Y coordinate for the public
+  //  * key in starkwareEx-Lib requests going forward for this account.
+  //  */
+  // async createAccount(
+  //   starkKey: string,
+  //   starkKeyYCoordinate: string,
+  // ): Promise<{ account: AccountResponseObject }> {
+  //   return this.post(
+  //     'accounts',
+  //     {
+  //       starkKey,
+  //       starkKeyYCoordinate,
+  //     },
+  //   );
+  // }
 
   /**
    * @description get account associated with an ethereumAddress and accountNumber 0
@@ -271,76 +272,61 @@ export default class Private {
     );
   }
 
+  // Not yet supported
   /**
    * @description get leaderboard pnl for period
    *
    * @param period the period of pnls to retrieve
    */
-  async getAccountLeaderboardPnl(
-    period: AccountLeaderboardPnlPeriod,
-    params: {
-      startedBeforeOrAt?: ISO8601,
-    },
-    genericParams: GenericParams = {},
-  ): Promise<{ leaderboardPnl: AccountLeaderboardPnlResponseObject }> {
-    return this._get(
-      `accounts/leaderboard-pnl/${period}`,
-      {
-        ...params,
-        ...genericParams,
-      },
-    );
-  }
+  // async getAccountLeaderboardPnl(
+  //   period: AccountLeaderboardPnlPeriod,
+  //   params: {
+  //     startedBeforeOrAt?: ISO8601,
+  //   },
+  //   genericParams: GenericParams = {},
+  // ): Promise<{ leaderboardPnl: AccountLeaderboardPnlResponseObject }> {
+  //   return this._get(
+  //     `accounts/leaderboard-pnl/${period}`,
+  //     {
+  //       ...params,
+  //       ...genericParams,
+  //     },
+  //   );
+  // }
 
+  // Not yet supported
   /**
    * @description get historical leaderboard pnls for period
    *
    * @param period the period of pnls to retrieve
    */
-  async getAccountHistoricalLeaderboardPnl(
-    period: AccountLeaderboardPnlPeriod,
-    params: {
-      limit?: number,
-    },
-    genericParams: GenericParams = {},
-  ): Promise<HistoricalLeaderboardPnlsResponseObject> {
-    return this._get(
-      `accounts/historical-leaderboard-pnls/${period}`,
-      {
-        ...params,
-        ...genericParams,
-      },
-    );
-  }
+  // async getAccountHistoricalLeaderboardPnl(
+  //   period: AccountLeaderboardPnlPeriod,
+  //   params: {
+  //     limit?: number,
+  //   },
+  //   genericParams: GenericParams = {},
+  // ): Promise<HistoricalLeaderboardPnlsResponseObject> {
+  //   return this._get(
+  //     `accounts/historical-leaderboard-pnls/${period}`,
+  //     {
+  //       ...params,
+  //       ...genericParams,
+  //     },
+  //   );
+  // }
 
   /**
    * @description get all positions for an account, meeting query parameters
-   *
-   * @param {
-   * @market the positions are for
-   * @status of the positions
-   * @limit to the number of positions returned
-   * @createdBeforeOrAt latest the positions could have been created
-   * }
    */
-  async getPositions(
-    params: {
-      market?: Market,
-      status?: PositionStatus,
-      limit?: number,
-      createdBeforeOrAt?: ISO8601,
-    },
-    genericParams: GenericParams = {},
-  ): Promise<{ positions: PositionResponseObject[] }> {
+  async getPositions(): Promise<{ positions: PositionResponseObject[] }> {
     return this._get(
       'positions',
-      {
-        ...params,
-        ...genericParams,
-      },
+      {},
     );
   }
 
+  // Not supported yet
   /**
    * @description get orders for a user by a set of query parameters
    *
@@ -355,27 +341,28 @@ export default class Private {
    * from most recent to least recent (up to limit)
    * }
    */
-  async getOrders(
-    params: {
-      market?: Market,
-      status?: OrderStatus,
-      side?: OrderSide,
-      type?: OrderType,
-      limit?: number,
-      createdBeforeOrAt?: ISO8601,
-      returnLatestOrders?: boolean,
-    } = {},
-    genericParams: GenericParams = {},
-  ): Promise<{ orders: OrderResponseObject[] }> {
-    return this._get(
-      'orders',
-      {
-        ...params,
-        ...genericParams,
-      },
-    );
-  }
+  // async getOrders(
+  //   params: {
+  //     market?: Market,
+  //     status?: OrderStatus,
+  //     side?: OrderSide,
+  //     type?: OrderType,
+  //     limit?: number,
+  //     createdBeforeOrAt?: ISO8601,
+  //     returnLatestOrders?: boolean,
+  //   } = {},
+  //   genericParams: GenericParams = {},
+  // ): Promise<{ orders: OrderResponseObject[] }> {
+  //   return this._get(
+  //     'orders',
+  //     {
+  //       ...params,
+  //       ...genericParams,
+  //     },
+  //   );
+  // }
 
+  // Not yet supported
   /**
    * @description get active orders (PENDING, OPEN, UNTRIGGERED) for a user by a set of query
    * parameters - if id is included then side is required
@@ -386,49 +373,48 @@ export default class Private {
    * @id of the order
    * }
    */
-  async getActiveOrders(
-    market: Market,
-    side?: OrderSide,
-    id?: string,
-    genericParams: GenericParams = {},
-  ): Promise<{ orders: ActiveOrderResponseObject[] }> {
-    return this._get(
-      'active-orders',
-      {
-        market,
-        side,
-        id,
-        ...genericParams,
-      },
-    );
-  }
+  // async getActiveOrders(
+  //   market: Market,
+  //   side?: OrderSide,
+  //   id?: string,
+  //   genericParams: GenericParams = {},
+  // ): Promise<{ orders: ActiveOrderResponseObject[] }> {
+  //   return this._get(
+  //     'active-orders',
+  //     {
+  //       market,
+  //       side,
+  //       id,
+  //       ...genericParams,
+  //     },
+  //   );
+  // }
 
+  // Not yet supported
   /**
    * @description get an order by a unique id
    *
    * @param orderId of the order
    */
-  async getOrderById(
-    orderId: string,
-    genericParams: GenericParams = {},
-  ): Promise<{ order: OrderResponseObject }> {
-    return this._get(
-      `orders/${orderId}`,
-      { ...genericParams },
-    );
-  }
+  // async getOrderById(
+  //   orderId: string,
+  //   genericParams: GenericParams = {},
+  // ): Promise<{ order: OrderResponseObject }> {
+  //   return this._get(
+  //     `orders/${orderId}`,
+  //     { ...genericParams },
+  //   );
+  // }
 
   /**
    * @description get an order by a clientId
    *
    * @param clientId of the order
    */
-  async getOpenOrders(
-    genericParams: GenericParams = {},
-  ): Promise<{ order: OrderResponseObject }> {
+  async getOpenOrders(): Promise<{ order: OrderResponseObject[] }> {
     return this._get(
       'openorders',
-      { ...genericParams },
+      {},
     );
   }
 
@@ -436,9 +422,9 @@ export default class Private {
    *@description place a new order
    *
    * @param {
-   * @market of the order
+   * @instrument of the order (market)
    * @side of the order
-   * @type of the order
+   * @orderType of the order
    * @timeInForce of the order
    * @postOnly of the order
    * @size of the order
@@ -451,25 +437,22 @@ export default class Private {
    * }
    * @param positionId associated with the order
    */
-  async createOrder(
-    params: PartialBy<ApiOrder, 'clientId' | 'signature'>,
+  async submitOrder(
+    params: PartialBy<ApiOrder, 'signature'>,
     positionId: string,
   ): Promise<{ order: OrderResponseObject }> {
-    const clientId = params.clientId || generateRandomClientId();
-
     let signature: string | undefined = params.signature;
     if (!signature) {
       if (!this.starkKeyPair) {
         throw new Error('Order is not signed and client was not initialized with starkPrivateKey');
       }
       const orderToSign: OrderWithClientId = {
-        humanSize: params.size,
+        humanSize: params.quantity,
         humanPrice: params.price,
         limitFee: params.limitFee,
-        market: params.market,
+        market: params.instrument,
         side: params.side,
         expirationIsoTimestamp: params.expiration,
-        clientId,
         positionId,
       };
       const starkOrder = SignableOrder.fromOrder(orderToSign, this.networkId);
@@ -478,7 +461,6 @@ export default class Private {
 
     const order: ApiOrder = {
       ...params,
-      clientId,
       signature,
     };
 
@@ -493,26 +475,27 @@ export default class Private {
    *
    * @param orderId of the order being canceled
    */
-  async cancelOrder(orderId: string): Promise<{ cancelOrder: OrderResponseObject }> {
-    return this.delete(
-      `orders/${orderId}`,
-      {},
+  async cancelOrder(orderId: string, instrument: string): Promise<{ cancelOrder: OrderResponseObject }> {
+    return this.post(
+      `cancel`,
+      {
+        orderID: orderId,
+        instrument: instrument
+      },
     );
   }
 
   /**
-   * @description cancel all orders for a user for a specific market
-   *
-   * @param market of the orders being canceled
+   * @description cancel all orders for a user
    */
-  async cancelAllOrders(market?: Market): Promise<{ cancelOrders: OrderResponseObject[] }> {
-    const params = market ? { market } : {};
-    return this.delete(
-      'orders',
-      params,
+  async cancelAllOrders(): Promise<{ cancelOrders: OrderResponseObject[] }> {
+    return this.post(
+      'cancelall',
+      {}
     );
   }
 
+  // Not yet supported
   /**
    * @description cancel active orders (PENDING, OPEN, UNTRIGGERED) for a user by a set of query
    * parameters - if id is included then side is required
@@ -523,50 +506,51 @@ export default class Private {
    * @id of the order
    * }
    */
-  async cancelActiveOrders(
-    market: Market,
-    side?: OrderSide,
-    id?: string,
-    genericParams: GenericParams = {},
-  ): Promise<{ cancelOrders: ActiveOrderResponseObject[] }> {
-    return this.delete(
-      'active-orders',
-      {
-        market,
-        side,
-        id,
-        ...genericParams,
-      },
-    );
-  }
+  // async cancelActiveOrders(
+  //   market: Market,
+  //   side?: OrderSide,
+  //   id?: string,
+  //   genericParams: GenericParams = {},
+  // ): Promise<{ cancelOrders: ActiveOrderResponseObject[] }> {
+  //   return this.delete(
+  //     'active-orders',
+  //     {
+  //       market,
+  //       side,
+  //       id,
+  //       ...genericParams,
+  //     },
+  //   );
+  // }
 
-  /**
-   *@description get fills for a user by a set of query parameters
-   *
-   * @param {
-   * @market the fills are for
-   * @orderId associated with the fills
-   * @limit to the number of fills returned
-   * @createdBeforeOrAt sets the time of the last fill that will be received
-   * }
-   */
-  async getFills(
-    params: {
-      market?: Market,
-      orderId?: string,
-      limit?: number,
-      createdBeforeOrAt?: ISO8601,
-    },
-    genericParams: GenericParams = {},
-  ): Promise<{ fills: FillResponseObject[] }> {
-    return this._get(
-      'fills',
-      {
-        ...params,
-        ...genericParams,
-      },
-    );
-  }
+  // Not yet supported
+  // /**
+  //  *@description get fills for a user by a set of query parameters
+  //  *
+  //  * @param {
+  //  * @market the fills are for
+  //  * @orderId associated with the fills
+  //  * @limit to the number of fills returned
+  //  * @createdBeforeOrAt sets the time of the last fill that will be received
+  //  * }
+  //  */
+  // async getFills(
+  //   params: {
+  //     market?: Market,
+  //     orderId?: string,
+  //     limit?: number,
+  //     createdBeforeOrAt?: ISO8601,
+  //   },
+  //   genericParams: GenericParams = {},
+  // ): Promise<{ fills: FillResponseObject[] }> {
+  //   return this._get(
+  //     'fills',
+  //     {
+  //       ...params,
+  //       ...genericParams,
+  //     },
+  //   );
+  // }
 
   /**
    * @description get transfers for a user by a set of query parameters
@@ -762,17 +746,11 @@ export default class Private {
    * }
    */
   async getFundingPayments(
-    params: {
-      market?: Market,
-      limit?: number,
-      effectiveBeforeOrAt?: ISO8601,
-    },
     genericParams: GenericParams = {},
-  ): Promise<{ fundingPayments: FundingResponseObject }> {
-    return this._get(
-      'funding',
+  ): Promise<{ data: FundingResponseObject[] }> {
+    return this.post(
+      'funding-history',
       {
-        ...params,
         ...genericParams,
       },
     );
