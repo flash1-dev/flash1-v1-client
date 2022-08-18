@@ -27,6 +27,6 @@ describe('Verify signature is as expected', () => {
       requestPath: '/v1/api-keys?ethereumAddress=0xE5714924C8C5c732F92A439075C8211eB0611aaC',
       method: RequestMethod.GET,
       isoTimestamp: '2021-02-01T19:38:54.508Z',
-    })).toEqual('kQ6ZF9HkappyXGQ8xSTyOnweOCpJ1U+BA/uRjWQF0jQ=');
+    })).toEqual('3H/uHAJiEdvIufXGwq2erXlTL82RjYzx68PxmBbT8lk=');
   });
 });
