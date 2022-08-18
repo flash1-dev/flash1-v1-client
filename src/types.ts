@@ -199,6 +199,8 @@ export interface ApiOrder extends ApiStarkwareSigned {
   postOnly: boolean;
   hidden: boolean;
   limitFee: string;
+  leverage: string;
+  clientId: string;
 }
 
 export interface ApiWithdrawal extends ApiStarkwareSigned {

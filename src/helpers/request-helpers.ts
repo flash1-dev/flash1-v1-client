@@ -1,6 +1,11 @@
 import { ethers } from 'ethers';
+import cryptoJS from 'crypto-js';
+import BN from 'bn.js';
 
 import { stripHexPrefix } from '../eth-signing/helpers';
+
+const MAX_VAULT_ID = new BN(2).pow(new BN(64));
+
 
 export function generateQueryPath(url: string, params: {}): string {
   const definedEntries = Object.entries(params)
@@ -25,4 +30,17 @@ export function keccak256Buffer(input: Buffer): Buffer {
 
 export function generateRandomClientId() {
   return Math.random().toString().slice(2).replace(/^0+/, '');
+}
+
+export function getDefaultVaultId(starkPublicKey: string) {
+  const hash = cryptoJS.algo.SHA256.create();
+  const vaultIdHex = hash.update(cryptoJS.enc.Hex.parse(stripHexPrefix(starkPublicKey))).finalize().toString(cryptoJS.enc.Hex);
+  return hexToBn(vaultIdHex).mod(MAX_VAULT_ID).toString();
+}
+
+/**
+ * Convert a hex string with optional 0x prefix to a BN.
+ */
+export function hexToBn(hex: string): BN {
+  return new BN(stripHexPrefix(hex), 16);
 }

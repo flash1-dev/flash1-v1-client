@@ -24,10 +24,11 @@
   "author": "flash1 & dydx",
   "license": "Apache-2.0",
   "dependencies": {
-    "@flash1-exchange/starkex-lib": "^1.0.5",
+    "@flash1-exchange/starkex-lib": "^1.0.7",
     "@types/crypto-js": "^4.1.1",
     "axios": "^0.21.1",
     "bignumber.js": "^9.0.1",
+    "bn.js": "^5.2.1",
     "crypto-js": "^4.1.1",
     "es6-promisify": "^6.0.1",
     "ethers": "5.4",

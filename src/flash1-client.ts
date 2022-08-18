@@ -27,9 +27,9 @@ export class Flash1Client {
   readonly apiTimeout?: number;
   readonly ethSendOptions?: EthereumSendOptions;
   readonly networkId: number;
-  readonly starkPrivateKey?: string | KeyPair;
   readonly signer?: Signer;
   apiKeyCredentials?: ApiKeyCredentials;
+  starkPrivateKey?: string | KeyPair;
 
   // Modules.
   private readonly _public: Public;
@@ -138,22 +138,26 @@ export class Flash1Client {
   /**
    * Get the eth module, used for interacting with Ethereum smart contracts.
    */
-//   get eth() {
-//     if (!this._eth) {
-//       if (this.signer) {
-//         this._eth = new StarkwareLib(
-//           this.signer.currentProvider,
-//           this.networkId,
-//           this.ethSendOptions,
-//         );
-//       } else {
-//         return notSupported(
-//           'Eth endpoints are not supported since neither web3 nor web3Provider was provided',
-//         ) as StarkwareLib;
-//       }
-//     }
-//     return this._eth;
-//   }
+  //   get eth() {
+  //     if (!this._eth) {
+  //       if (this.signer) {
+  //         this._eth = new StarkwareLib(
+  //           this.signer.currentProvider,
+  //           this.networkId,
+  //           this.ethSendOptions,
+  //         );
+  //       } else {
+  //         return notSupported(
+  //           'Eth endpoints are not supported since neither web3 nor web3Provider was provided',
+  //         ) as StarkwareLib;
+  //       }
+  //     }
+  //     return this._eth;
+  //   }
+
+  setStarkPrivateKey(privateOrKeyPair: string | KeyPair) {
+    this.starkPrivateKey = privateOrKeyPair;
+  }
 }
 
 /**

@@ -7,11 +7,15 @@ coverage/
 # production
 build/
 
+# local
+local
+
 # misc
 .DS_Store
 .env.local
 .nyc_output
 npm-debug.log
+yarn-error.log
 
 # vim
 *.swo

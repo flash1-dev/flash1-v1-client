@@ -11,7 +11,7 @@ import {
 import crypto from 'crypto-js';
 import _ from 'lodash';
 
-import { generateQueryPath, generateRandomClientId } from '../helpers/request-helpers';
+import { generateQueryPath, generateRandomClientId, getDefaultVaultId } from '../helpers/request-helpers';
 import {
   RequestMethod,
   axiosRequest,
@@ -69,6 +69,7 @@ export default class Private {
   readonly networkId: number;
   // readonly starkLib: StarkwareLib;
   readonly starkKeyPair?: KeyPair;
+  readonly defaultPositionId?: string;
   readonly clock: Clock;
 
   constructor({
@@ -90,6 +91,7 @@ export default class Private {
     // this.starkLib = new StarkwareLib({} as Provider, networkId);
     if (starkPrivateKey) {
       this.starkKeyPair = asSimpleKeyPair(asEcKeyPair(starkPrivateKey));
+      this.defaultPositionId = getDefaultVaultId(this.starkKeyPair.publicKey);
     }
     this.clock = clock;
   }
@@ -438,9 +440,9 @@ export default class Private {
    * @param positionId associated with the order
    */
   async submitOrder(
-    params: PartialBy<ApiOrder, 'signature'>,
-    positionId: string,
+    params: PartialBy<ApiOrder, 'signature' | 'clientId'>,
   ): Promise<{ order: OrderResponseObject }> {
+    const clientId = generateRandomClientId();
     let signature: string | undefined = params.signature;
     if (!signature) {
       if (!this.starkKeyPair) {
@@ -453,7 +455,8 @@ export default class Private {
         market: params.instrument,
         side: params.side,
         expirationIsoTimestamp: params.expiration,
-        positionId,
+        positionId: this.defaultPositionId,
+        clientId
       };
       const starkOrder = SignableOrder.fromOrder(orderToSign, this.networkId);
       signature = await starkOrder.sign(this.starkKeyPair);
@@ -461,11 +464,12 @@ export default class Private {
 
     const order: ApiOrder = {
       ...params,
+      clientId,
       signature,
     };
 
     return this.post(
-      'orders',
+      'order',
       order,
     );
   }
@@ -949,6 +953,7 @@ export default class Private {
       crypto.algo.SHA256,
       crypto.enc.Base64url.parse(this.apiKeyCredentials.secret),
     );
-    return hmac.update(messageString).finalize().toString(crypto.enc.Base64);
+    const base64ParsedMsg = Buffer.from(messageString).toString('base64');
+    return hmac.update(base64ParsedMsg).finalize().toString(crypto.enc.Base64);
   }
 }
