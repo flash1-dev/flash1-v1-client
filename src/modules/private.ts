@@ -529,7 +529,7 @@ export default class Private {
         senderPositionId: this.defaultPositionId,
         receiverPositionId: getDefaultVaultId(this.flashloanAccount),
         receiverPublicKey: this.flashloanAccount,
-        humanAmount: `${params.flashloan}`,
+        humanAmount: this.getFlashloanPriceWithInterest(params.flashloan),
         clientId,
         expirationIsoTimestamp: params.expiration,
       }
@@ -1029,6 +1029,10 @@ export default class Private {
   private getClosingOrderPrice(side: StarkwareOrderSide, price: string): string {
     const margin = 0.1;
     return side === StarkwareOrderSide.BUY ? `${parseInt(price) * (1 - margin)}` : `${parseInt(price) * (1 + margin)}`
+  }
+
+  private getFlashloanPriceWithInterest(flashloan: number): string {
+    return `${flashloan * 1.0001}`
   }
 
   // ============ Signing ============
