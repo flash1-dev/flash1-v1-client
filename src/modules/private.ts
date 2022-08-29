@@ -91,7 +91,7 @@ export default class Private {
     networkId: number,
     starkPrivateKey?: string | KeyPair,
     clock: Clock,
-    flashloanAccount: string
+    flashloanAccount?: string
   }) {
     this.host = host;
     this.apiKeyCredentials = apiKeyCredentials;
