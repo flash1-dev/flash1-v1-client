@@ -5,8 +5,11 @@ import {
   OrderWithClientId,
   SignableOrder,
   SignableWithdrawal,
+  SignableTransfer,
   asEcKeyPair,
   asSimpleKeyPair,
+  TransferParams,
+  StarkwareOrderSide
 } from '@flash1-exchange/starkex-lib';
 import crypto from 'crypto-js';
 import isEmpty from 'lodash/isEmpty';
@@ -50,7 +53,8 @@ import {
   UserComplianceResponseObject,
   ProfilePrivateResponseObject,
   HistoricalLeaderboardPnlsResponseObject,
-  Provider
+  Provider,
+  ApiOrderWithFlashloan
 } from '../types';
 import Clock from './clock';
 
@@ -72,6 +76,7 @@ export default class Private {
   readonly starkKeyPair?: KeyPair;
   readonly defaultPositionId?: string;
   readonly clock: Clock;
+  readonly flashloanAccount: string;
 
   constructor({
     host,
@@ -79,12 +84,14 @@ export default class Private {
     starkPrivateKey,
     networkId,
     clock,
+    flashloanAccount
   }: {
     host: string,
     apiKeyCredentials: ApiKeyCredentials,
     networkId: number,
     starkPrivateKey?: string | KeyPair,
     clock: Clock,
+    flashloanAccount: string
   }) {
     this.host = host;
     this.apiKeyCredentials = apiKeyCredentials;
@@ -95,6 +102,7 @@ export default class Private {
       this.defaultPositionId = getDefaultVaultId(this.starkKeyPair.publicKey);
     }
     this.clock = clock;
+    this.flashloanAccount = flashloanAccount;
   }
 
   // ============ Request Helpers ============
@@ -434,9 +442,8 @@ export default class Private {
    * @price of the order
    * @limitFee of the order
    * @expiration of the order
-   * @cancelId if the order is replacing an existing one
-   * @triggerPrice of the order if the order is a triggerable order
-   * @trailingPercent of the order if the order is a trailing stop order
+   * @hidden if the order should remain hidden in the orderbook
+   * @timeInForce 
    * }
    * @param positionId associated with the order
    */
@@ -474,6 +481,94 @@ export default class Private {
       order,
     );
   }
+
+
+  /**
+ *@description place a new short term order
+ *
+ * @param {
+ * @instrument of the order (market)
+ * @side of the order
+ * @orderType of the order
+ * @timeInForce of the order
+ * @postOnly of the order
+ * @size of the order
+ * @price of the order
+ * @limitFee of the order
+ * @expiration of the order
+ * @hidden if the order should remain hidden in the orderbook
+ * @flashloan the borrowing amount
+ * @timeInForce 
+ * }
+ * @param positionId associated with the order
+ */
+  async submitShortTermOrder(
+    params: PartialBy<ApiOrderWithFlashloan, 'signature' | 'flashloanSignature' | 'closingOrderSignature' | 'clientId'>,
+  ): Promise<{ order: OrderResponseObject }> {
+    const clientId = generateRandomClientId();
+    let signature: string | undefined = params.signature;
+    let flashloanSignature: string | undefined = params.flashloanSignature;
+    let closingOrderSignature: string | undefined = params.closingOrderSignature;
+    if (!signature) {
+      if (!this.starkKeyPair) {
+        throw new Error('Order is not signed and client was not initialized with starkPrivateKey');
+      }
+      const orderToSign: OrderWithClientId = {
+        humanSize: params.quantity,
+        humanPrice: params.price,
+        limitFee: params.limitFee,
+        market: params.instrument,
+        side: params.side,
+        expirationIsoTimestamp: params.expiration,
+        positionId: this.defaultPositionId,
+        clientId
+      };
+      const starkOrder = SignableOrder.fromOrder(orderToSign, this.networkId);
+
+      const flashLoanTransferToSign: TransferParams = {
+        senderPositionId: this.defaultPositionId,
+        receiverPositionId: getDefaultVaultId(this.flashloanAccount),
+        receiverPublicKey: this.flashloanAccount,
+        humanAmount: `${params.flashloan}`,
+        clientId,
+        expirationIsoTimestamp: params.expiration,
+      }
+      const flashLoanTransferOrder = SignableTransfer.fromTransfer(flashLoanTransferToSign, this.networkId)
+
+      const closingOrderToSign: OrderWithClientId = {
+        humanSize: params.quantity,
+        humanPrice: this.getClosingOrderPrice(params.side, params.price),
+        limitFee: params.limitFee,
+        market: params.instrument,
+        side: params.side === StarkwareOrderSide.BUY ? StarkwareOrderSide.SELL : StarkwareOrderSide.BUY,
+        expirationIsoTimestamp: params.expiration,
+        positionId: this.defaultPositionId,
+        clientId
+      };
+      const closingOrder = SignableOrder.fromOrder(closingOrderToSign, this.networkId);
+
+      [signature, flashloanSignature, closingOrderSignature] = await Promise.all([
+        starkOrder.sign(this.starkKeyPair),
+        flashLoanTransferOrder.sign(this.starkKeyPair),
+        closingOrder.sign(this.starkKeyPair)
+      ])
+
+    }
+
+    const order: ApiOrderWithFlashloan = {
+      ...params,
+      clientId,
+      signature,
+      flashloanSignature,
+      closingOrderSignature
+    };
+
+    return this.post(
+      'short-term/order',
+      order,
+    );
+  }
+
 
   /**
    * @description cancel a specific order for a user by the order's unique id
@@ -929,6 +1024,11 @@ export default class Private {
         ...genericParams,
       },
     );
+  }
+
+  private getClosingOrderPrice(side: StarkwareOrderSide, price: string): string {
+    const margin = 0.1;
+    return side === StarkwareOrderSide.BUY ? `${parseInt(price) * (1 - margin)}` : `${parseInt(price) * (1 + margin)}`
   }
 
   // ============ Signing ============
