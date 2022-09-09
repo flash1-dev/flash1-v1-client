@@ -1,6 +1,7 @@
 import BigNumber from 'bignumber.js';
 import * as ethers from 'ethers';
-import _ from 'lodash';
+import pick from 'lodash/pick';
+import keys from 'lodash/keys';
 
 import {
   SigningMethod,
@@ -158,8 +159,8 @@ export abstract class SignOffChainAction<M extends {}> {
   ): string {
     // Make sure the output is deterministic for a given input.
     return JSON.stringify({
-      ..._.pick(this.getDomainData(), PERSONAL_SIGN_DOMAIN_PARAMS),
-      ..._.pick(message, _.keys(message).sort()),
+      ...pick(this.getDomainData(), PERSONAL_SIGN_DOMAIN_PARAMS),
+      ...pick(message, keys(message).sort()),
     }, null, 2);
   }
 
@@ -167,7 +168,7 @@ export abstract class SignOffChainAction<M extends {}> {
     const hash: string | null = ethers.utils.solidityKeccak256(
       ['bytes32', 'bytes32', 'bytes32', 'uint256'],
       [hashString(EIP712_DOMAIN_STRING_NO_CONTRACT), hashString(this.domain),
-        hashString(this.version), new BigNumber(this.networkId).toFixed(0)],
+      hashString(this.version), new BigNumber(this.networkId).toFixed(0)],
     );
     // Non-null assertion operator is safe, hash is null only on empty input.
     return hash!;

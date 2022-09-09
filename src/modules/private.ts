@@ -1,4 +1,4 @@
-// import { StarkwareLib } from '@dydxprotocol/starkex-eth';
+import { StarkwareLib } from '@flash1-exchange/starkex-eth';
 import {
   ApiMethod,
   KeyPair,
@@ -9,7 +9,7 @@ import {
   asSimpleKeyPair,
 } from '@flash1-exchange/starkex-lib';
 import crypto from 'crypto-js';
-import _ from 'lodash';
+import isEmpty from 'lodash/isEmpty';
 
 import { generateQueryPath, generateRandomClientId, getDefaultVaultId } from '../helpers/request-helpers';
 import {
@@ -50,6 +50,7 @@ import {
   UserComplianceResponseObject,
   ProfilePrivateResponseObject,
   HistoricalLeaderboardPnlsResponseObject,
+  Provider
 } from '../types';
 import Clock from './clock';
 
@@ -67,7 +68,7 @@ export default class Private {
   readonly host: string;
   readonly apiKeyCredentials: ApiKeyCredentials;
   readonly networkId: number;
-  // readonly starkLib: StarkwareLib;
+  readonly starkLib: StarkwareLib;
   readonly starkKeyPair?: KeyPair;
   readonly defaultPositionId?: string;
   readonly clock: Clock;
@@ -88,7 +89,7 @@ export default class Private {
     this.host = host;
     this.apiKeyCredentials = apiKeyCredentials;
     this.networkId = networkId;
-    // this.starkLib = new StarkwareLib({} as Provider, networkId);
+    this.starkLib = new StarkwareLib({} as Provider, networkId);
     if (starkPrivateKey) {
       this.starkKeyPair = asSimpleKeyPair(asEcKeyPair(starkPrivateKey));
       this.defaultPositionId = getDefaultVaultId(this.starkKeyPair.publicKey);
@@ -947,7 +948,7 @@ export default class Private {
       isoTimestamp +
       METHOD_ENUM_MAP[method] +
       requestPath +
-      (_.isEmpty(data) ? '' : JSON.stringify(data))
+      (isEmpty(data) ? '' : JSON.stringify(data))
     );
     const hmac = crypto.algo.HMAC.create(
       crypto.algo.SHA256,
