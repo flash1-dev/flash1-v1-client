@@ -38,6 +38,15 @@ const config = {
   },
   resolve: {
     extensions: [".tsx", ".ts", ".js"],
+    fallback: {
+      "stream": require.resolve("stream-browserify"),
+      "crypto": require.resolve("crypto-browserify"),
+      "assert": require.resolve("assert"),
+      "http": require.resolve("stream-http"),
+      "url": require.resolve("url"),
+      "os": require.resolve("os-browserify/browser"),
+      "https": require.resolve("https-browserify")
+    }
   },
 };
 

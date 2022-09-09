@@ -1,4 +1,4 @@
-// import { StarkwareLib } from '@dydxprotocol/starkex-eth';
+import { StarkwareLib } from '@flash1-exchange/starkex-eth';
 import {
   ApiMethod,
   KeyPair,
@@ -50,6 +50,7 @@ import {
   UserComplianceResponseObject,
   ProfilePrivateResponseObject,
   HistoricalLeaderboardPnlsResponseObject,
+  Provider
 } from '../types';
 import Clock from './clock';
 
@@ -67,7 +68,7 @@ export default class Private {
   readonly host: string;
   readonly apiKeyCredentials: ApiKeyCredentials;
   readonly networkId: number;
-  // readonly starkLib: StarkwareLib;
+  readonly starkLib: StarkwareLib;
   readonly starkKeyPair?: KeyPair;
   readonly defaultPositionId?: string;
   readonly clock: Clock;
@@ -88,7 +89,7 @@ export default class Private {
     this.host = host;
     this.apiKeyCredentials = apiKeyCredentials;
     this.networkId = networkId;
-    // this.starkLib = new StarkwareLib({} as Provider, networkId);
+    this.starkLib = new StarkwareLib({} as Provider, networkId);
     if (starkPrivateKey) {
       this.starkKeyPair = asSimpleKeyPair(asEcKeyPair(starkPrivateKey));
       this.defaultPositionId = getDefaultVaultId(this.starkKeyPair.publicKey);
