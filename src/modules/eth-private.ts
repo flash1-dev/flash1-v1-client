@@ -1,5 +1,5 @@
 import { ApiMethod } from '@flash1-exchange/starkex-lib';
-import _ from 'lodash';
+import isEmpty from 'lodash/isEmpty';
 
 import { SignEthPrivateAction } from '../eth-signing';
 import { generateQueryPath } from '../helpers/request-helpers';
@@ -62,7 +62,7 @@ export default class EthPrivate {
     return axiosRequest({
       url: `${this.host}${requestPath}`,
       method,
-      data: !_.isEmpty(data) ? body : undefined,
+      data: !isEmpty(data) ? body : undefined,
       headers: {
         'FLASH1-SIGNATURE': signature,
         'FLASH1-TIMESTAMP': timestamp,

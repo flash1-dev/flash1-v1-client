@@ -9,7 +9,7 @@ import {
   asSimpleKeyPair,
 } from '@flash1-exchange/starkex-lib';
 import crypto from 'crypto-js';
-import _ from 'lodash';
+import isEmpty from 'lodash/isEmpty';
 
 import { generateQueryPath, generateRandomClientId, getDefaultVaultId } from '../helpers/request-helpers';
 import {
@@ -948,7 +948,7 @@ export default class Private {
       isoTimestamp +
       METHOD_ENUM_MAP[method] +
       requestPath +
-      (_.isEmpty(data) ? '' : JSON.stringify(data))
+      (isEmpty(data) ? '' : JSON.stringify(data))
     );
     const hmac = crypto.algo.HMAC.create(
       crypto.algo.SHA256,
