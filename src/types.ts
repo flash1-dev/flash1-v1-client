@@ -199,6 +199,12 @@ export interface ApiOrder extends ApiStarkwareSigned {
   clientId: string;
 }
 
+export interface ApiOrderWithFlashloan extends ApiOrder {
+  flashloan: number
+  flashloanSignature: string
+  closingOrderSignature: string
+}
+
 export interface ApiWithdrawal extends ApiStarkwareSigned {
   amount: string;
   asset: TradableAsset;
