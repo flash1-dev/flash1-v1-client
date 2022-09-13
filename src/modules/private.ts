@@ -1032,7 +1032,7 @@ export default class Private {
   }
 
   private getFlashloanPriceWithInterest(flashloan: number): string {
-    return `${flashloan * 1.0001}`
+    return `${flashloan * 1.000001}`
   }
 
   // ============ Signing ============
