@@ -506,6 +506,8 @@ export default class Private {
     params: PartialBy<ApiOrderWithFlashloan, 'signature' | 'flashloanSignature' | 'closingOrderSignature' | 'clientId'>,
   ): Promise<{ order: OrderResponseObject }> {
     const clientId = generateRandomClientId();
+    var clientId2 = parseInt(clientId, 10) + 1;
+    var clientId3 = clientId2 + 1;
     let signature: string | undefined = params.signature;
     let flashloanSignature: string | undefined = params.flashloanSignature;
     let closingOrderSignature: string | undefined = params.closingOrderSignature;
@@ -521,7 +523,7 @@ export default class Private {
         side: params.side,
         expirationIsoTimestamp: params.expiration,
         positionId: this.defaultPositionId,
-        clientId
+        clientId: clientId
       };
       const starkOrder = SignableOrder.fromOrder(orderToSign, this.networkId);
 
@@ -530,7 +532,7 @@ export default class Private {
         receiverPositionId: getDefaultVaultId(this.flashloanAccount),
         receiverPublicKey: this.flashloanAccount,
         humanAmount: this.getFlashloanPriceWithInterest(params.flashloan),
-        clientId,
+        clientId: clientId2.toString(),
         expirationIsoTimestamp: params.expiration,
       }
       const flashLoanTransferOrder = SignableTransfer.fromTransfer(flashLoanTransferToSign, this.networkId)
@@ -543,7 +545,7 @@ export default class Private {
         side: params.side === StarkwareOrderSide.BUY ? StarkwareOrderSide.SELL : StarkwareOrderSide.BUY,
         expirationIsoTimestamp: params.expiration,
         positionId: this.defaultPositionId,
-        clientId
+        clientId: clientId3.toString()
       };
       const closingOrder = SignableOrder.fromOrder(closingOrderToSign, this.networkId);
 
