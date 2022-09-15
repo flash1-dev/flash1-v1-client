@@ -506,7 +506,7 @@ export default class Private {
     params: PartialBy<ApiOrderWithFlashloan, 'signature' | 'flashloanSignature' | 'closingOrderSignature' | 'clientId'>,
   ): Promise<{ order: OrderResponseObject }> {
     const clientId = generateRandomClientId();
-    var clientId2 = parseInt(clientId, 10) + 1
+    var clientId2 = parseInt(clientId, 10) + 1;
     var clientId3 = clientId2 + 1;
     let signature: string | undefined = params.signature;
     let flashloanSignature: string | undefined = params.flashloanSignature;
