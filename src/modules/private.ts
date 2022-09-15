@@ -77,6 +77,7 @@ export default class Private {
   readonly defaultPositionId?: string;
   readonly clock: Clock;
   readonly flashloanAccount: string;
+  readonly insuranceAccount: string;
 
   constructor({
     host,
@@ -503,13 +504,15 @@ export default class Private {
  * @param positionId associated with the order
  */
   async submitShortTermOrder(
-    params: PartialBy<ApiOrderWithFlashloan, 'signature' | 'flashloanSignature' | 'closingOrderSignature' | 'clientId'>,
+    params: PartialBy<ApiOrderWithFlashloan, 'signature' | 'flashloanSignature' | 'insuranceSignature' | 'closingOrderSignature' | 'clientId'>,
   ): Promise<{ order: OrderResponseObject }> {
     const clientId = generateRandomClientId();
     var clientId2 = parseInt(clientId, 10) + 1;
     var clientId3 = clientId2 + 1;
+    var clientId4 = clientId3 + 1;
     let signature: string | undefined = params.signature;
     let flashloanSignature: string | undefined = params.flashloanSignature;
+    let insuranceSignature: string | undefined = params.insuranceSignature;
     let closingOrderSignature: string | undefined = params.closingOrderSignature;
     if (!signature) {
       if (!this.starkKeyPair) {
@@ -537,6 +540,16 @@ export default class Private {
       }
       const flashLoanTransferOrder = SignableTransfer.fromTransfer(flashLoanTransferToSign, this.networkId)
 
+      const insuranceTransferToSign: TransferParams = {
+        senderPositionId: this.defaultPositionId,
+        receiverPositionId: getDefaultVaultId(this.insuranceAccount),
+        receiverPublicKey: this.insuranceAccount,
+        humanAmount: this.getInsurancePremium(params.flashloan),
+        clientId: clientId3.toString(),
+        expirationIsoTimestamp: params.expiration,
+      }
+      const insuranceTransferOrder = SignableTransfer.fromTransfer(insuranceTransferToSign, this.networkId)
+
       const closingOrderToSign: OrderWithClientId = {
         humanSize: params.quantity,
         humanPrice: this.getClosingOrderPrice(params.side, params.price),
@@ -545,13 +558,14 @@ export default class Private {
         side: params.side === StarkwareOrderSide.BUY ? StarkwareOrderSide.SELL : StarkwareOrderSide.BUY,
         expirationIsoTimestamp: params.expiration,
         positionId: this.defaultPositionId,
-        clientId: clientId3.toString()
+        clientId: clientId4.toString()
       };
       const closingOrder = SignableOrder.fromOrder(closingOrderToSign, this.networkId);
 
-      [signature, flashloanSignature, closingOrderSignature] = await Promise.all([
+      [signature, flashloanSignature, insuranceSignature, closingOrderSignature] = await Promise.all([
         starkOrder.sign(this.starkKeyPair),
         flashLoanTransferOrder.sign(this.starkKeyPair),
+        insuranceTransferOrder.sign(this.starkKeyPair),
         closingOrder.sign(this.starkKeyPair)
       ])
 
@@ -562,6 +576,7 @@ export default class Private {
       clientId,
       signature,
       flashloanSignature,
+      insuranceSignature,
       closingOrderSignature
     };
 
@@ -1035,6 +1050,10 @@ export default class Private {
 
   private getFlashloanPriceWithInterest(flashloan: number): string {
     return `${flashloan * 1.000001}`
+  }
+
+  private getInsurancePremium(flashloan: number): string {
+    return `${flashloan * 0.0003}`
   }
 
   // ============ Signing ============

@@ -202,6 +202,7 @@ export interface ApiOrder extends ApiStarkwareSigned {
 export interface ApiOrderWithFlashloan extends ApiOrder {
   flashloan: number
   flashloanSignature: string
+  insuranceSignature: string
   closingOrderSignature: string
 }
 
