@@ -195,7 +195,6 @@ export interface ApiOrder extends ApiStarkwareSigned {
   postOnly: boolean;
   hidden: boolean;
   limitFee: string;
-  leverage: string;
   clientId: string;
 }
 
