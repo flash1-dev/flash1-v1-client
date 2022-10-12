@@ -8,7 +8,16 @@ import {
   asEcKeyPair,
   asSimpleKeyPair,
   TransferParams,
-  StarkwareOrderSide
+  StarkwareOrderSide,
+  ASSET_RESOLUTION,
+  FLASH1_CONTRACT_SIZE,
+  SYNTHETIC_ASSET_MAP,
+  REVERSE_SYNTHETIC_ASSET_MAP,
+  Flash1Asset,
+  getStarkwareLimitFeeAmount,
+  Flash1Market,
+  SyntheticAsset,
+  SYNTHETIC_ASSETS
 } from '@flash1-exchange/starkex-lib';
 import crypto from 'crypto-js';
 import isEmpty from 'lodash/isEmpty';
@@ -83,7 +92,8 @@ export default class Private {
     starkPrivateKey,
     networkId,
     clock,
-    flashloanAccount
+    flashloanAccount,
+    insuranceAccount,
   }: {
     host: string,
     apiKeyCredentials: ApiKeyCredentials,
@@ -91,6 +101,7 @@ export default class Private {
     starkPrivateKey?: string | KeyPair,
     clock: Clock,
     flashloanAccount?: string
+    insuranceAccount?: string
   }) {
     this.host = host;
     this.apiKeyCredentials = apiKeyCredentials;
@@ -101,6 +112,7 @@ export default class Private {
     }
     this.clock = clock;
     this.flashloanAccount = flashloanAccount;
+    this.insuranceAccount = insuranceAccount;
   }
 
   // ============ Request Helpers ============
@@ -427,6 +439,18 @@ export default class Private {
     );
   }
 
+    /**
+   * @description get an order by a clientId
+   *
+   * @param clientId of the order
+   */
+     async getOpenPositions(): Promise<{ order: OrderResponseObject[] }> {
+      return this._get(
+        'positions',
+        {},
+      );
+    }
+
   /**
    *@description place a new order
    *
@@ -454,6 +478,12 @@ export default class Private {
       if (!this.starkKeyPair) {
         throw new Error('Order is not signed and client was not initialized with starkPrivateKey');
       }
+      if (typeof params.quantity === 'undefined') {
+        params.quantity = this.getHumanReadableQuantity(SYNTHETIC_ASSET_MAP[params.instrument], params.userCollateral, params.leverage, params.price)
+      } else {
+        params.quantity = this.getFlash1QuantizedQuantity(SYNTHETIC_ASSET_MAP[params.instrument], params.quantity)
+      }
+
       const orderToSign: OrderWithClientId = {
         humanSize: params.quantity,
         humanPrice: params.price,
@@ -515,6 +545,13 @@ export default class Private {
       if (!this.starkKeyPair) {
         throw new Error('Order is not signed and client was not initialized with starkPrivateKey');
       }
+
+      if (typeof params.quantity === 'undefined') {
+        params.quantity = this.getHumanReadableQuantityForFlashLoan(SYNTHETIC_ASSET_MAP[params.instrument], params.flashloan, params.leverage, params.price);
+      } else {
+        params.quantity = this.getFlash1QuantizedQuantity(SYNTHETIC_ASSET_MAP[params.instrument], params.quantity)
+      }
+
       const orderToSign: OrderWithClientId = {
         humanSize: params.quantity,
         humanPrice: params.price,
@@ -525,7 +562,9 @@ export default class Private {
         positionId: this.defaultPositionId,
         clientId: clientId
       };
+
       const starkOrder = SignableOrder.fromOrder(orderToSign, this.networkId);
+      var closingStamp = starkOrder.toStarkware().expirationEpochHours;
 
       const flashLoanTransferToSign: TransferParams = {
         senderPositionId: this.defaultPositionId,
@@ -536,7 +575,7 @@ export default class Private {
         expirationIsoTimestamp: params.expiration,
       }
       const flashLoanTransferOrder = SignableTransfer.fromTransfer(flashLoanTransferToSign, this.networkId)
-
+      flashLoanTransferOrder.toStarkware().expirationEpochHours = closingStamp;
       const insuranceTransferToSign: TransferParams = {
         senderPositionId: this.defaultPositionId,
         receiverPositionId: getDefaultVaultId(this.insuranceAccount),
@@ -546,7 +585,7 @@ export default class Private {
         expirationIsoTimestamp: params.expiration,
       }
       const insuranceTransferOrder = SignableTransfer.fromTransfer(insuranceTransferToSign, this.networkId)
-
+      insuranceTransferOrder.toStarkware().expirationEpochHours = closingStamp;
       const closingOrderToSign: OrderWithClientId = {
         humanSize: params.quantity,
         humanPrice: this.getClosingOrderPrice(params.side, params.price),
@@ -558,15 +597,20 @@ export default class Private {
         clientId: clientId4.toString()
       };
       const closingOrder = SignableOrder.fromOrder(closingOrderToSign, this.networkId);
-
+      var cc = starkOrder.toStarkware().quantumsAmountCollateral;
+      var closingAmount = this.getClosingOrderCollateralAmount(params.side, cc);
+      closingOrder.toStarkware().quantumsAmountCollateral = closingAmount;
+      closingOrder.toStarkware().quantumsAmountFee = starkOrder.toStarkware().quantumsAmountFee;
+      closingOrder.toStarkware().expirationEpochHours = closingStamp;
+      
       [signature, flashloanSignature, insuranceSignature, closingOrderSignature] = await Promise.all([
         starkOrder.sign(this.starkKeyPair),
         flashLoanTransferOrder.sign(this.starkKeyPair),
         insuranceTransferOrder.sign(this.starkKeyPair),
         closingOrder.sign(this.starkKeyPair)
       ])
-
     }
+
 
     const order: ApiOrderWithFlashloan = {
       ...params,
@@ -1041,16 +1085,45 @@ export default class Private {
   }
 
   private getClosingOrderPrice(side: StarkwareOrderSide, price: string): string {
-    const margin = 0.1;
-    return side === StarkwareOrderSide.BUY ? `${parseInt(price) * (1 - margin)}` : `${parseInt(price) * (1 + margin)}`
+    const margin = 0.2;
+    return side === StarkwareOrderSide.BUY ? `${parseFloat(price) * (1 - margin)}` : `${parseFloat(price) * (1 + margin)}`
+  }
+
+  private getClosingOrderCollateralAmount(openingOrderSide: StarkwareOrderSide, quantumsAmountCollateral: string): string {
+    var original = BigInt(quantumsAmountCollateral);
+    var adjustment = (original / BigInt(10)) * BigInt(2); // 20% adjustment with truncate (calculation order cannot be changed)
+    return openingOrderSide === StarkwareOrderSide.BUY ? `${original - adjustment}` : `${original + adjustment}`;
   }
 
   private getFlashloanPriceWithInterest(flashloan: number): string {
-    return `${flashloan * 1.000001}`
+    var r = Math.pow(10, ASSET_RESOLUTION.USDC);
+    return `${Math.round((flashloan * 1.000001)*r)/r}`
   }
 
   private getInsurancePremium(flashloan: number): string {
-    return `${flashloan * 0.0003}`
+    var r = Math.pow(10, ASSET_RESOLUTION.USDC);
+    return `${Math.round((flashloan * 0.0003)*r)/r}`
+  }
+
+  private getHumanReadableQuantityForFlashLoan(asset: SyntheticAsset, flashloan: number, leverage: number, price: string): string {
+    var r = Math.pow(10, ASSET_RESOLUTION[asset]);
+    var totalPositionSize = flashloan * leverage;
+    var roundedHumanReadableQuantity = Math.round((totalPositionSize / parseFloat(price))*r)/r;
+    return this.getFlash1QuantizedQuantity(asset, roundedHumanReadableQuantity.toFixed(ASSET_RESOLUTION[asset]));
+  }
+
+  private getHumanReadableQuantity(asset: SyntheticAsset, userCollateral: number, leverage: number, price: string): string {
+    var r = Math.pow(10, ASSET_RESOLUTION[asset]);
+    var totalPositionSize = userCollateral * leverage;
+    var roundedHumanReadableQuantity = Math.round((totalPositionSize / parseFloat(price))*r)/r;
+    return this.getFlash1QuantizedQuantity(asset, roundedHumanReadableQuantity.toFixed(ASSET_RESOLUTION[asset]));
+  }
+
+  private getFlash1QuantizedQuantity(asset: SyntheticAsset, quantity: string): string {
+    const contractSize = FLASH1_CONTRACT_SIZE[REVERSE_SYNTHETIC_ASSET_MAP[asset]];
+    const contractResolution = -Math.log10(contractSize);
+    const internallyQuantized = Math.floor(parseFloat(quantity)/contractSize);
+    return (internallyQuantized*contractSize).toFixed(contractResolution);
   }
 
   // ============ Signing ============
