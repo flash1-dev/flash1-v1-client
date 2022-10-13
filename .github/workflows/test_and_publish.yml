@@ -70,7 +70,7 @@ jobs:
         run: echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}" > ~/.npmrc
       - name: build package
         run: yarn && yarn build
-      - name: add tags
+      - name: Publish to NPM
         run: ./scripts/publish_if_not_exists.sh
       - name: Push tags
         uses: CasperWA/push-protected@v2
@@ -78,7 +78,4 @@ jobs:
           token: ${{ secrets.PAT }}
           branch: master
           tags: true
-      - name: publish to 'npm'
-        run: yarn publish --access public
-
     
