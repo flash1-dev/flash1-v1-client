@@ -1,18 +1,11 @@
-import {
-  asEcKeyPair,
-  asSimpleKeyPair
-} from '@flash1-exchange/starkex-lib';
+import { asEcKeyPair, asSimpleKeyPair } from '@flash1-exchange/starkex-lib';
 import { Flash1 as Flash1Eth, Config } from '@flash1-exchange/starkex-eth';
 import Clock from './modules/clock';
 import EthPrivate from './modules/eth-private';
 import Onboarding from './modules/onboarding';
 import Private from './modules/private';
 import Public from './modules/public';
-import {
-  ApiKeyCredentials,
-  Signer,
-  KeyPair,
-} from './types';
+import { ApiKeyCredentials, Signer, KeyPair } from './types';
 import { addHexPrefix } from './helpers/request-helpers';
 
 export interface ClientOptions {
@@ -20,7 +13,7 @@ export interface ClientOptions {
   networkId?: number;
   starkPrivateKey?: string | KeyPair;
   signer?: Signer;
-  ethAddress?: string
+  ethAddress?: string;
   apiKeyCredentials?: ApiKeyCredentials;
   timestampAdjustment?: number;
   flashloanAccount?: string;
@@ -30,7 +23,7 @@ export interface ClientOptions {
 export class Flash1Client {
   readonly host: string;
   readonly apiTimeout?: number;
-  readonly ethAddress?: string
+  readonly ethAddress?: string;
   readonly networkId: number;
   readonly signer?: Signer;
   readonly flashloanAccount?: string;
@@ -48,17 +41,15 @@ export class Flash1Client {
   private _onboarding?: Onboarding;
   private _eth?: Flash1Eth;
 
-  constructor(
-    host: string,
-    options: ClientOptions = {},
-  ) {
+  constructor(host: string, options: ClientOptions = {}) {
     this.host = host;
     this.apiTimeout = options.apiTimeout;
-    this.networkId = typeof options.networkId === 'number' ? options.networkId : 1;
+    this.networkId =
+      typeof options.networkId === 'number' ? options.networkId : 1;
     this.starkPrivateKey = options.starkPrivateKey;
     this.apiKeyCredentials = options.apiKeyCredentials;
     this.signer = options.signer;
-    this.ethAddress = options.ethAddress
+    this.ethAddress = options.ethAddress;
     this.flashloanAccount = options.flashloanAccount;
     this.insuranceAccount = options.insuranceAccount;
 
@@ -94,11 +85,11 @@ export class Flash1Client {
           networkId: this.networkId,
           clock: this._clock,
           flashloanAccount: this.flashloanAccount,
-          insuranceAccount: this.insuranceAccount
+          insuranceAccount: this.insuranceAccount,
         });
       } else {
         return notSupported(
-          'Private endpoints are not supported since apiKeyCredentials was not provided',
+          'Private endpoints are not supported since apiKeyCredentials was not provided'
         ) as Private;
       }
     }
@@ -119,7 +110,7 @@ export class Flash1Client {
         });
       } else {
         return notSupported(
-          'Eth private endpoints are not supported since neither web3 nor web3Provider was provided',
+          'Eth private endpoints are not supported since neither web3 nor web3Provider was provided'
         ) as EthPrivate;
       }
     }
@@ -132,10 +123,14 @@ export class Flash1Client {
   get onboarding(): Onboarding {
     if (!this._onboarding) {
       if (this.signer) {
-        this._onboarding = new Onboarding(this.host, this.signer, this.networkId);
+        this._onboarding = new Onboarding(
+          this.host,
+          this.signer,
+          this.networkId
+        );
       } else {
         return notSupported(
-          'Onboarding endpoints are not supported since neither web3 nor web3Provider was provided',
+          'Onboarding endpoints are not supported since neither web3 nor web3Provider was provided'
         ) as Onboarding;
       }
     }
@@ -145,13 +140,21 @@ export class Flash1Client {
   /**
    * Get the eth module, used for interacting with Ethereum smart contracts.
    */
-    get eth() {
-      if (!this._eth) {
-        if (this.signer && this.starkPrivateKey && this.ethAddress) {
-          const starkPrivateKey = (typeof this.starkPrivateKey == 'string') ? this.starkPrivateKey : this.starkPrivateKey.privateKey
-          const starkKeypair = asSimpleKeyPair(asEcKeyPair(starkPrivateKey))
-          console.log('CONFIGGGGGGGG', this.networkId == 1 ? Config.MAINNET : Config.GOERLI)
-          this._eth = new Flash1Eth(this.networkId == 1 ? Config.MAINNET : Config.GOERLI, {
+  get eth() {
+    if (!this._eth) {
+      if (this.signer && this.starkPrivateKey && this.ethAddress) {
+        const starkPrivateKey =
+          typeof this.starkPrivateKey == 'string'
+            ? this.starkPrivateKey
+            : this.starkPrivateKey.privateKey;
+        const starkKeypair = asSimpleKeyPair(asEcKeyPair(starkPrivateKey));
+        console.log(
+          'CONFIGGGGGGGG',
+          this.networkId == 1 ? Config.MAINNET : Config.GOERLI
+        );
+        this._eth = new Flash1Eth(
+          this.networkId == 1 ? Config.MAINNET : Config.GOERLI,
+          {
             starkex: {
               publicKey: addHexPrefix(starkKeypair.publicKey),
               privateKey: addHexPrefix(starkPrivateKey.toString()),
@@ -160,15 +163,16 @@ export class Flash1Client {
               publicKey: this.ethAddress,
               privateKey: '',
             },
-          });
-        } else {
-          return notSupported(
-            `Eth endpoints are not supported since neither signer nor starkPrivateKey were provided`,
-          ) as Flash1Eth;
-        }
+          }
+        );
+      } else {
+        return notSupported(
+          `Eth endpoints are not supported since neither signer nor starkPrivateKey were provided`
+        ) as Flash1Eth;
       }
-      return this._eth;
     }
+    return this._eth;
+  }
 
   setStarkPrivateKey(privateOrKeyPair: string | KeyPair) {
     this.starkPrivateKey = privateOrKeyPair;
@@ -178,9 +182,7 @@ export class Flash1Client {
 /**
  * Returns a proxy object that throws with the given message when trying to call a function on it.
  */
-function notSupported(
-  errorMessage: string,
-): {} {
+function notSupported(errorMessage: string): {} {
   const handler = {
     get() {
       throw new Error(errorMessage);

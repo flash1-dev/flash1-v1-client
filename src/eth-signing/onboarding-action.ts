@@ -18,43 +18,32 @@ const EIP712_ONBOARDING_ACTION_STRUCT = [
   { type: 'string', name: 'action' },
   { type: 'string', name: 'onlySignOn' },
 ];
-const EIP712_ONBOARDING_ACTION_STRUCT_STRING = (
-  'flash1(' +
-  'string action,' +
-  'string onlySignOn' +
-  ')'
-);
+const EIP712_ONBOARDING_ACTION_STRUCT_STRING =
+  'flash1(' + 'string action,' + 'string onlySignOn' + ')';
 
 const EIP712_ONBOARDING_ACTION_STRUCT_TESTNET = [
   { type: 'string', name: 'action' },
 ];
-const EIP712_ONBOARDING_ACTION_STRUCT_STRING_TESTNET = (
-  'flash1(' +
-  'string action' +
-  ')'
-);
+const EIP712_ONBOARDING_ACTION_STRUCT_STRING_TESTNET =
+  'flash1(' + 'string action' + ')';
 
 export class SignOnboardingAction extends SignOffChainAction<OnboardingAction> {
-
-  constructor(
-    signer: Signer,
-    networkId: number,
-  ) {
+  constructor(signer: Signer, networkId: number) {
     // On mainnet, include an extra onlySignOn parameter.
-    const eip712Struct = networkId === 1
-      ? EIP712_ONBOARDING_ACTION_STRUCT
-      : EIP712_ONBOARDING_ACTION_STRUCT_TESTNET;
+    const eip712Struct =
+      networkId === 1
+        ? EIP712_ONBOARDING_ACTION_STRUCT
+        : EIP712_ONBOARDING_ACTION_STRUCT_TESTNET;
 
     super(signer, networkId, eip712Struct);
   }
 
-  public getHash(
-    message: OnboardingAction,
-  ): string {
+  public getHash(message: OnboardingAction): string {
     // On mainnet, include an extra onlySignOn parameter.
-    const eip712StructString = this.networkId === 1
-      ? EIP712_ONBOARDING_ACTION_STRUCT_STRING
-      : EIP712_ONBOARDING_ACTION_STRUCT_STRING_TESTNET;
+    const eip712StructString =
+      this.networkId === 1
+        ? EIP712_ONBOARDING_ACTION_STRUCT_STRING
+        : EIP712_ONBOARDING_ACTION_STRUCT_STRING_TESTNET;
 
     const data = {
       types: ['bytes32', 'bytes32'],
@@ -64,17 +53,22 @@ export class SignOnboardingAction extends SignOffChainAction<OnboardingAction> {
     // On mainnet, include an extra onlySignOn parameter.
     if (this.networkId === 1) {
       if (!message.onlySignOn) {
-        throw new Error('The onlySignOn is required when onboarding to mainnet');
+        throw new Error(
+          'The onlySignOn is required when onboarding to mainnet'
+        );
       }
-      data.types.push(
-        'bytes32',
-      );
+      data.types.push('bytes32');
       data.values.push(hashString(message.onlySignOn));
     } else if (message.onlySignOn) {
-      throw new Error('Unexpected onlySignOn when signing for non-mainnet network');
+      throw new Error(
+        'Unexpected onlySignOn when signing for non-mainnet network'
+      );
     }
 
-    const structHash: string | null = ethers.utils.solidityKeccak256(data.types, data.values);
+    const structHash: string | null = ethers.utils.solidityKeccak256(
+      data.types,
+      data.values
+    );
     // Non-null assertion operator is safe, hash is null only on empty input.
     return this.getEIP712Hash(structHash!);
   }

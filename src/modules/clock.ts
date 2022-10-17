@@ -1,6 +1,4 @@
-import {
-  ISO8601,
-} from '../types';
+import { ISO8601 } from '../types';
 
 export default class Clock {
   private _timestampAdjustment: number;
@@ -15,9 +13,7 @@ export default class Clock {
    *
    * @param timestampAdjustment seconds to adjust the system time.
    */
-  public setTimestampAdjustment(
-    timestampAdjustment: number,
-  ): void {
+  public setTimestampAdjustment(timestampAdjustment: number): void {
     this._timestampAdjustment = timestampAdjustment;
   }
 

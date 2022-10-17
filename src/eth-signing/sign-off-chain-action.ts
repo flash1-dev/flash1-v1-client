@@ -3,12 +3,7 @@ import * as ethers from 'ethers';
 import pick from 'lodash/pick';
 import keys from 'lodash/keys';
 
-import {
-  SigningMethod,
-  SignatureTypes,
-  Address,
-  Signer,
-} from '../types';
+import { SigningMethod, SignatureTypes, Address, Signer } from '../types';
 import {
   EIP712_DOMAIN_STRING_NO_CONTRACT,
   // EIP712_DOMAIN_STRUCT_NO_CONTRACT,
@@ -45,7 +40,7 @@ export abstract class SignOffChainAction<M extends {}> {
     }: {
       domain?: string;
       version?: string;
-    } = {},
+    } = {}
   ) {
     this.signer = signer;
     this.networkId = networkId;
@@ -59,12 +54,10 @@ export abstract class SignOffChainAction<M extends {}> {
   /**
    * Returns a signable EIP712 Hash of a struct
    */
-  public getEIP712Hash(
-    structHash: string,
-  ): string {
+  public getEIP712Hash(structHash: string): string {
     const hash: string | null = ethers.utils.solidityKeccak256(
       ['bytes2', 'bytes32', 'bytes32'],
-      ['0x1901', this.getDomainHash() as string, structHash],
+      ['0x1901', this.getDomainHash() as string, structHash]
     );
     // Non-null assertion operator is safe, hash is null only on empty input.
     return hash!;
@@ -73,21 +66,29 @@ export abstract class SignOffChainAction<M extends {}> {
   public async sign(
     signer: string,
     signingMethod: SigningMethod,
-    message: M,
+    message: M
   ): Promise<string> {
     switch (signingMethod) {
       case SigningMethod.Hash:
       case SigningMethod.UnsafeHash:
       case SigningMethod.Compatibility: {
         const hash = this.getHash(message);
-        const rawSignature = await this.signer.signMessage(ethers.utils.arrayify(hash));
+        const rawSignature = await this.signer.signMessage(
+          ethers.utils.arrayify(hash)
+        );
 
-        const hashSig = createTypedSignature(rawSignature, SignatureTypes.DECIMAL);
+        const hashSig = createTypedSignature(
+          rawSignature,
+          SignatureTypes.DECIMAL
+        );
         if (signingMethod === SigningMethod.Hash) {
           return hashSig;
         }
 
-        const unsafeHashSig = createTypedSignature(rawSignature, SignatureTypes.NO_PREPEND);
+        const unsafeHashSig = createTypedSignature(
+          rawSignature,
+          SignatureTypes.NO_PREPEND
+        );
         if (signingMethod === SigningMethod.UnsafeHash) {
           return unsafeHashSig;
         }
@@ -98,15 +99,16 @@ export abstract class SignOffChainAction<M extends {}> {
         return hashSig;
       }
 
-      // @ts-ignore Fallthrough case in switch.
       case SigningMethod.MetaMask:
       case SigningMethod.MetaMaskLatest:
       case SigningMethod.CoinbaseWallet:
       case SigningMethod.TypedData: {
-        const rawSignature = await (this.signer as ethers.Wallet)._signTypedData(
+        const rawSignature = await (
+          this.signer as ethers.Wallet
+        )._signTypedData(
           this.getDomainData(),
           { [this.domain]: this.actionStruct },
-          message,
+          message
         );
         return createTypedSignature(rawSignature, SignatureTypes.NO_PREPEND);
       }
@@ -124,10 +126,12 @@ export abstract class SignOffChainAction<M extends {}> {
   public verify(
     typedSignature: string,
     expectedSigner: Address,
-    message: M,
+    message: M
   ): boolean {
     if (stripHexPrefix(typedSignature).length !== 66 * 2) {
-      throw new Error(`Unable to verify signature with invalid length: ${typedSignature}`);
+      throw new Error(
+        `Unable to verify signature with invalid length: ${typedSignature}`
+      );
     }
 
     const sigType = parseInt(typedSignature.slice(-2), 16);
@@ -154,21 +158,27 @@ export abstract class SignOffChainAction<M extends {}> {
    *
    * This signing method may be used in cases where EIP-712 signing is not possible.
    */
-  public getPersonalSignMessage(
-    message: M,
-  ): string {
+  public getPersonalSignMessage(message: M): string {
     // Make sure the output is deterministic for a given input.
-    return JSON.stringify({
-      ...pick(this.getDomainData(), PERSONAL_SIGN_DOMAIN_PARAMS),
-      ...pick(message, keys(message).sort()),
-    }, null, 2);
+    return JSON.stringify(
+      {
+        ...pick(this.getDomainData(), PERSONAL_SIGN_DOMAIN_PARAMS),
+        ...pick(message, keys(message).sort()),
+      },
+      null,
+      2
+    );
   }
 
   public getDomainHash(): string {
     const hash: string | null = ethers.utils.solidityKeccak256(
       ['bytes32', 'bytes32', 'bytes32', 'uint256'],
-      [hashString(EIP712_DOMAIN_STRING_NO_CONTRACT), hashString(this.domain),
-      hashString(this.version), new BigNumber(this.networkId).toFixed(0)],
+      [
+        hashString(EIP712_DOMAIN_STRING_NO_CONTRACT),
+        hashString(this.domain),
+        hashString(this.version),
+        new BigNumber(this.networkId).toFixed(0),
+      ]
     );
     // Non-null assertion operator is safe, hash is null only on empty input.
     return hash!;
@@ -179,11 +189,9 @@ export abstract class SignOffChainAction<M extends {}> {
    */
   protected async ethSignPersonalInternal(
     signer: string,
-    message: string,
+    message: string
   ): Promise<string> {
-    const dataHash = ethers.utils.keccak256(
-      ethers.utils.toUtf8Bytes(message),
-    );
+    const dataHash = ethers.utils.keccak256(ethers.utils.toUtf8Bytes(message));
     const dataHashBin = ethers.utils.arrayify(dataHash);
     const signature = await this.signer.signMessage(dataHashBin);
     return createTypedSignature(signature, SignatureTypes.PERSONAL); // TODO: do we need this?

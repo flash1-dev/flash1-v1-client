@@ -33,20 +33,17 @@ export default class Public {
 
   // ============ Request Helpers ============
 
-  private get(
-    requestPath: string,
-    params: {},
-  ): Promise<Data> {
+  private get(requestPath: string, params: {}): Promise<Data> {
     return axiosRequest({
       method: 'GET',
-      url: `${this.host}/api/v1/public/${generateQueryPath(requestPath, params)}`,
+      url: `${this.host}/api/v1/public/${generateQueryPath(
+        requestPath,
+        params
+      )}`,
     });
   }
 
-  protected async put(
-    requestPath: string,
-    data: {},
-  ): Promise<Data> {
+  protected async put(requestPath: string, data: {}): Promise<Data> {
     return axiosRequest({
       url: `${this.host}/api/v1/public/${requestPath}`,
       method: 'PUT',
@@ -62,9 +59,9 @@ export default class Public {
    * @param ethereumAddress of the user
    */
   doesUserExistWithAddress(
-    ethereumAddress: string,
+    ethereumAddress: string
   ): Promise<{ exists: boolean }> {
-    const uri: string = 'users/exists';
+    const uri = 'users/exists';
     return this.get(uri, { ethereumAddress });
   }
 
@@ -73,10 +70,8 @@ export default class Public {
    *
    * @param username being queried
    */
-  doesUserExistWithUsername(
-    username: string,
-  ): Promise<{ exists: boolean }> {
-    const uri: string = 'usernames';
+  doesUserExistWithUsername(username: string): Promise<{ exists: boolean }> {
+    const uri = 'usernames';
     return this.get(uri, { username });
   }
 
@@ -85,8 +80,10 @@ export default class Public {
    *
    * @param market if only one market should be returned
    */
-  getMarkets(market?: ListedMarket): Promise<{ markets: MarketsResponseObject }> {
-    const uri: string = 'markets';
+  getMarkets(
+    market?: ListedMarket
+  ): Promise<{ markets: MarketsResponseObject }> {
+    const uri = 'markets';
     return this.get(uri, { market });
   }
 
@@ -111,12 +108,10 @@ export default class Public {
     market,
     days,
   }: {
-    market?: ListedMarket,
-    days?: MarketStatisticDay,
+    market?: ListedMarket;
+    days?: MarketStatisticDay;
   }): Promise<{ markets: MarketStatisticResponseObject }> {
-    const uri: string = market !== undefined
-      ? `stats/${market}`
-      : 'stats';
+    const uri: string = market !== undefined ? `stats/${market}` : 'stats';
     return this.get(uri, { days });
   }
 
@@ -130,10 +125,10 @@ export default class Public {
     market,
     startingBeforeOrAt,
   }: {
-    market: ListedMarket,
-    startingBeforeOrAt?: ISO8601,
+    market: ListedMarket;
+    startingBeforeOrAt?: ISO8601;
   }): Promise<{ trades: Trade[] }> {
-    const uri: string = `trades/${market}`;
+    const uri = `trades/${market}`;
     return this.get(uri, { startingBeforeOrAt });
   }
 
@@ -147,10 +142,10 @@ export default class Public {
     market,
     effectiveBeforeOrAt,
   }: {
-    market: ListedMarket,
-    effectiveBeforeOrAt?: ISO8601,
+    market: ListedMarket;
+    effectiveBeforeOrAt?: ISO8601;
   }): Promise<{ historicalFunding: HistoricalFundingResponseObject[] }> {
-    const uri: string = `historical-funding/${market}`;
+    const uri = `historical-funding/${market}`;
     return this.get(uri, { effectiveBeforeOrAt });
   }
 
@@ -168,11 +163,15 @@ export default class Public {
     creditAmount,
     debitAmount,
   }: {
-    creditAsset?: TransferAsset,
-    creditAmount?: string,
-    debitAmount?: string,
+    creditAsset?: TransferAsset;
+    creditAmount?: string;
+    debitAmount?: string;
   }): Promise<FastWithdrawalsResponseObject> {
-    return this.get('fast-withdrawals', { creditAsset, creditAmount, debitAmount });
+    return this.get('fast-withdrawals', {
+      creditAsset,
+      creditAmount,
+      debitAmount,
+    });
   }
 
   /**
@@ -191,22 +190,19 @@ export default class Public {
     toISO,
     limit,
   }: {
-    market: ListedMarket,
-    resolution?: CandleResolution,
-    fromISO?: ISO8601,
-    toISO?: ISO8601,
-    limit?: number,
+    market: ListedMarket;
+    resolution?: CandleResolution;
+    fromISO?: ISO8601;
+    toISO?: ISO8601;
+    limit?: number;
   }): Promise<{ candles: CandleResponseObject[] }> {
-    const uri: string = `candles/${market}`;
-    return this.get(
-      uri,
-      {
-        resolution,
-        fromISO,
-        toISO,
-        limit,
-      },
-    );
+    const uri = `candles/${market}`;
+    return this.get(uri, {
+      resolution,
+      fromISO,
+      toISO,
+      limit,
+    });
   }
 
   /**
@@ -222,21 +218,18 @@ export default class Public {
     sortBy,
     limit,
   }: {
-    period: LeaderboardPnlPeriod,
-    startingBeforeOrAt?: ISO8601,
-    sortBy: LeaderboardPnlSortBy,
-    limit?: number,
+    period: LeaderboardPnlPeriod;
+    startingBeforeOrAt?: ISO8601;
+    sortBy: LeaderboardPnlSortBy;
+    limit?: number;
   }): Promise<LeaderboardPnlResponseObject> {
-    const uri: string = 'leaderboard-pnl';
-    return this.get(
-      uri,
-      {
-        period,
-        startingBeforeOrAt,
-        sortBy,
-        limit,
-      },
-    );
+    const uri = 'leaderboard-pnl';
+    return this.get(uri, {
+      period,
+      startingBeforeOrAt,
+      sortBy,
+      limit,
+    });
   }
 
   /**
@@ -245,15 +238,12 @@ export default class Public {
    * @param ethereumAddress An Ethereum address of a user
    */
   getPublicRetroactiveMiningRewards(
-    ethereumAddress: string,
+    ethereumAddress: string
   ): Promise<PublicRetroactiveMiningRewardsResponseObject> {
-    const uri: string = 'rewards/public-retroactive-mining';
-    return this.get(
-      uri,
-      {
-        ethereumAddress,
-      },
-    );
+    const uri = 'rewards/public-retroactive-mining';
+    return this.get(uri, {
+      ethereumAddress,
+    });
   }
 
   /**
@@ -263,20 +253,17 @@ export default class Public {
    * the email they specified
    */
   async verifyEmail(token: string): Promise<{}> {
-    return this.put(
-      'emails/verify-email',
-      {
-        token,
-      },
-    );
+    return this.put('emails/verify-email', {
+      token,
+    });
   }
 
   /**
    * @description get currently revealed Hedgies
    */
   getCurrentlyRevealedHedgies(): Promise<{
-    daily?: HedgiePeriodResponseObject,
-    weekly?: HedgiePeriodResponseObject,
+    daily?: HedgiePeriodResponseObject;
+    weekly?: HedgiePeriodResponseObject;
   }> {
     return this.get('hedgies/current', {});
   }
@@ -289,26 +276,23 @@ export default class Public {
     start,
     end,
   }: {
-    nftRevealType: NftRevealType,
-    start?: number,
-    end?: number,
+    nftRevealType: NftRevealType;
+    start?: number;
+    end?: number;
   }): Promise<{
-    historicalTokenIds: HedgiePeriodResponseObject[],
+    historicalTokenIds: HedgiePeriodResponseObject[];
   }> {
-    return this.get(
-      'hedgies/history',
-      {
-        nftRevealType,
-        start,
-        end,
-      },
-    );
+    return this.get('hedgies/history', {
+      nftRevealType,
+      start,
+      end,
+    });
   }
 
   /**
    * @description get api server time as iso and as epoch in seconds with MS
    */
-  getTime(): Promise<{ iso: string, epoch: number }> {
+  getTime(): Promise<{ iso: string; epoch: number }> {
     return this.get('time', {});
   }
 
@@ -338,7 +322,7 @@ export default class Public {
   async getProfilePublic({
     publicId,
   }: {
-    publicId: string,
+    publicId: string;
   }): Promise<ProfilePublicResponseObject> {
     return this.get(`profile/${publicId}`, {});
   }
