@@ -1395,10 +1395,10 @@
     ethers "^5.6.9"
     hash.js "^1.1.7"
 
-"@flash1-exchange/starkex-lib@^1.1.0":
-  version "1.1.0"
-  resolved "https://registry.yarnpkg.com/@flash1-exchange/starkex-lib/-/starkex-lib-1.1.0.tgz#71e981bf898bdc56aa2b3c220354f88109f2eea5"
-  integrity sha512-gArBU6ejG5tuEQ88vQsOJ66NBSOk0JPfD7pUAjYPR5bAGZjc3MYWXgTun8iChHW4hYILoGMwrKQWmjwnAoZRqA==
+"@flash1-exchange/starkex-lib@^1.2.4":
+  version "1.2.4"
+  resolved "https://registry.yarnpkg.com/@flash1-exchange/starkex-lib/-/starkex-lib-1.2.4.tgz#6448391e7bd670b6811b75e6bfcc8199a742bb28"
+  integrity sha512-dAFRXfnatuadVrO3f6Fw9vn4TJxszao6H4x0zC+H6HvdrYD0cIa4Q3UjjzRJEiOYI+q5/FL+/XsGocCh23hQGQ==
   dependencies:
     big.js "6.0.3"
     bigint-buffer "^1.1.5"
@@ -1407,6 +1407,7 @@
     crypto-js "^4.1.1"
     ethereum-cryptography "^0.1.3"
     hash.js "^1.1.7"
+    lodash "^4.17.21"
 
 "@istanbuljs/load-nyc-config@^1.0.0":
   version "1.1.0"
@@ -4977,7 +4978,7 @@ lodash@4.17.20:
   resolved "https://registry.yarnpkg.com/lodash/-/lodash-4.17.20.tgz#b44a9b6297bcb698f1c51a3545a2b3b368d59c52"
   integrity sha512-PlhdFcillOINfeV7Ni6oF1TAEayyZBoZ8bcshTHqOYJYlrqzRK5hagpagky5o4HfCzzd1TRkXPMFq6cKk9rGmA==
 
-lodash@^4.7.0:
+lodash@^4.17.21, lodash@^4.7.0:
   version "4.17.21"
   resolved "https://registry.yarnpkg.com/lodash/-/lodash-4.17.21.tgz#679591c564c3bffaae8454cf0b3df370c3d6911c"
   integrity sha512-v2kDEe57lecTulaDIuNTPy3Ry4gLGJ6Z1O3vE1krgXZNrsQ+LFTGHVxVjcXPs17LhbZVGedAJv8XZ1tvj5FvSg==
