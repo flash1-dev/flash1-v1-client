@@ -1,6 +1,4 @@
-import {
-  WrappedError,
-} from '../errors';
+import { WrappedError } from '../errors';
 
 interface AxiosOriginalError extends Error {
   isAxiosError: true;
@@ -8,9 +6,9 @@ interface AxiosOriginalError extends Error {
 }
 
 interface AxiosErrorResponse {
-  status: number,
-  statusText: string,
-  data: {},
+  status: number;
+  statusText: string;
+  data: {};
 }
 
 /**
@@ -31,13 +29,14 @@ export class AxiosServerError extends AxiosError {
   public readonly statusText: string;
   public readonly data: {};
 
-  constructor(
-    response: AxiosErrorResponse,
-    originalError: AxiosOriginalError,
-  ) {
+  constructor(response: AxiosErrorResponse, originalError: AxiosOriginalError) {
     super(
-      `${response.status}: ${response.statusText} - ${JSON.stringify(response.data, null, 2)}`,
-      originalError,
+      `${response.status}: ${response.statusText} - ${JSON.stringify(
+        response.data,
+        null,
+        2
+      )}`,
+      originalError
     );
     this.status = response.status;
     this.statusText = response.statusText;

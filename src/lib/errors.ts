@@ -15,10 +15,7 @@ export class CustomError extends Error {
 export class WrappedError extends CustomError {
   public readonly originalError: Error;
 
-  constructor(
-    message: string,
-    originalError: Error,
-  ) {
+  constructor(message: string, originalError: Error) {
     super(message);
     this.originalError = originalError;
   }

@@ -3,9 +3,7 @@ import isEmpty from 'lodash/isEmpty';
 
 import { SignEthPrivateAction } from '../eth-signing';
 import { generateQueryPath } from '../helpers/request-helpers';
-import {
-  axiosRequest,
-} from '../lib/axios';
+import { axiosRequest } from '../lib/axios';
 import {
   ApiKeyCredentials,
   Data,
@@ -27,10 +25,10 @@ export default class EthPrivate {
     networkId,
     clock,
   }: {
-    host: string,
-    signer: Signer,
-    networkId: number,
-    clock: Clock,
+    host: string;
+    signer: Signer;
+    networkId: number;
+    clock: Clock;
   }) {
     this.host = host;
     this.actionSigner = new SignEthPrivateAction(signer, networkId);
@@ -44,9 +42,9 @@ export default class EthPrivate {
     endpoint: string,
     ethereumAddress: string,
     signingMethod: SigningMethod,
-    data: {} = {},
+    data: {} = {}
   ): Promise<Data> {
-    const requestPath: string = `/api/v1/private/${endpoint}`;
+    const requestPath = `/api/v1/private/${endpoint}`;
     const timestamp: ISO8601 = this.clock.getAdjustedIsoString();
     const body: string = JSON.stringify(data);
     const signature: string = await this.actionSigner.sign(
@@ -57,7 +55,7 @@ export default class EthPrivate {
         requestPath,
         body,
         timestamp,
-      },
+      }
     );
     return axiosRequest({
       url: `${this.host}${requestPath}`,
@@ -74,27 +72,42 @@ export default class EthPrivate {
   protected async post(
     endpoint: string,
     ethereumAddress: string,
-    signingMethod: SigningMethod = SigningMethod.Hash,
+    signingMethod: SigningMethod = SigningMethod.Hash
   ): Promise<Data> {
-    return this.request(ApiMethod.POST, endpoint, ethereumAddress, signingMethod);
+    return this.request(
+      ApiMethod.POST,
+      endpoint,
+      ethereumAddress,
+      signingMethod
+    );
   }
 
   protected async delete(
     endpoint: string,
     ethereumAddress: string,
     signingMethod: SigningMethod = SigningMethod.Hash,
-    params: {},
+    params: {}
   ): Promise<Data> {
     const requestPath = generateQueryPath(endpoint, params);
-    return this.request(ApiMethod.DELETE, requestPath, ethereumAddress, signingMethod);
+    return this.request(
+      ApiMethod.DELETE,
+      requestPath,
+      ethereumAddress,
+      signingMethod
+    );
   }
 
   protected async get(
     endpoint: string,
     ethereumAddress: string,
-    signingMethod: SigningMethod = SigningMethod.Hash,
+    signingMethod: SigningMethod = SigningMethod.Hash
   ): Promise<Data> {
-    return this.request(ApiMethod.GET, endpoint, ethereumAddress, signingMethod);
+    return this.request(
+      ApiMethod.GET,
+      endpoint,
+      ethereumAddress,
+      signingMethod
+    );
   }
 
   // ============ Requests ============
@@ -107,7 +120,7 @@ export default class EthPrivate {
    */
   async createApiKey(
     ethereumAddress: string,
-    signingMethod: SigningMethod = SigningMethod.Hash,
+    signingMethod: SigningMethod = SigningMethod.Hash
   ): Promise<ApiKeyCredentials> {
     return this.post('api-keys', ethereumAddress, signingMethod);
   }
@@ -121,7 +134,7 @@ export default class EthPrivate {
   async deleteApiKey(
     apiKey: string,
     ethereumAddress: string,
-    signingMethod: SigningMethod = SigningMethod.Hash,
+    signingMethod: SigningMethod = SigningMethod.Hash
   ): Promise<void> {
     return this.delete('api-keys', ethereumAddress, signingMethod, { apiKey });
   }
@@ -136,14 +149,14 @@ export default class EthPrivate {
    */
   async recovery(
     ethereumAddress: string,
-    signingMethod: SigningMethod = SigningMethod.Hash,
+    signingMethod: SigningMethod = SigningMethod.Hash
   ): Promise<{
-    starkKey: string,
-    positionId: string,
-    equity: string,
-    freeCollateral: string,
-    quoteBalance: string,
-    positions: PositionResponseObject[],
+    starkKey: string;
+    positionId: string;
+    equity: string;
+    freeCollateral: string;
+    quoteBalance: string;
+    positions: PositionResponseObject[];
   }> {
     return this.get('recovery', ethereumAddress, signingMethod);
   }

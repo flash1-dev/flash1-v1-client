@@ -6,10 +6,7 @@ import {
 import { SignOnboardingAction } from '../eth-signing';
 import { stripHexPrefix } from '../eth-signing/helpers';
 import { keccak256Buffer } from '../helpers/request-helpers';
-import {
-  RequestMethod,
-  axiosRequest,
-} from '../lib/axios';
+import { RequestMethod, axiosRequest } from '../lib/axios';
 import {
   AccountResponseObject,
   ApiKeyCredentials,
@@ -35,11 +32,7 @@ export default class Onboarding {
   readonly networkId: number;
   readonly onBoardingSigner: SignOnboardingAction;
 
-  constructor(
-    host: string,
-    signer: Signer,
-    networkId: number,
-  ) {
+  constructor(host: string, signer: Signer, networkId: number) {
     this.host = host;
     this.networkId = networkId;
     this.onBoardingSigner = new SignOnboardingAction(signer, networkId);
@@ -52,26 +45,30 @@ export default class Onboarding {
     data: {},
     ethereumAddress: string,
     signature: string | null = null,
-    signingMethod: SigningMethod = SigningMethod.TypedData,
+    signingMethod: SigningMethod = SigningMethod.TypedData
   ): Promise<Data> {
-    const message: OnboardingAction = { action: OnboardingActionString.ONBOARDING };
+    const message: OnboardingAction = {
+      action: OnboardingActionString.ONBOARDING,
+    };
 
     // On mainnet, include an extra onlySignOn parameter.
     if (this.networkId === 1) {
       message.onlySignOn = 'https://flash1.com';
     }
 
-    const url: string = `/api/v1/public/${endpoint}`;
+    const url = `/api/v1/public/${endpoint}`;
     return axiosRequest({
       url: `${this.host}${url}`,
       method: RequestMethod.POST,
       data,
       headers: {
-        'FLASH1-SIGNATURE': signature || await this.onBoardingSigner.sign(
-          ethereumAddress,
-          signingMethod,
-          message,
-        ),
+        'FLASH1-SIGNATURE':
+          signature ||
+          (await this.onBoardingSigner.sign(
+            ethereumAddress,
+            signingMethod,
+            message
+          )),
         'FLASH1-ETHEREUM-ADDRESS': ethereumAddress,
       },
     });
@@ -95,25 +92,25 @@ export default class Onboarding {
    */
   async createUser(
     params: {
-      starkKey: string,
-      starkKeyYCoordinate: string,
-      referredByAffiliateLink?: string,
-      country?: ISO31661ALPHA2,
+      starkKey: string;
+      starkKeyYCoordinate: string;
+      referredByAffiliateLink?: string;
+      country?: ISO31661ALPHA2;
     },
     ethereumAddress: string,
     signature: string | null = null,
-    signingMethod?: SigningMethod,
+    signingMethod?: SigningMethod
   ): Promise<{
-    apiKey: ApiKeyCredentials,
-    user: UserResponseObject,
-    account: AccountResponseObject,
+    apiKey: ApiKeyCredentials;
+    user: UserResponseObject;
+    account: AccountResponseObject;
   }> {
     return this.post(
       'onboarding',
       params,
       ethereumAddress,
       signature,
-      signingMethod,
+      signingMethod
     );
   }
 
@@ -130,13 +127,15 @@ export default class Onboarding {
    */
   async deriveStarkKey(
     ethereumAddress: string,
-    signingMethod: SigningMethod = SigningMethod.TypedData,
+    signingMethod: SigningMethod = SigningMethod.TypedData
   ): Promise<KeyPairWithYCoordinate> {
     if (!KEY_DERIVATION_SUPPORTED_SIGNING_METHODS.includes(signingMethod)) {
       throw new Error('Unsupported signing method for API key derivation');
     }
 
-    const message: OnboardingAction = { action: OnboardingActionString.KEY_DERIVATION };
+    const message: OnboardingAction = {
+      action: OnboardingActionString.KEY_DERIVATION,
+    };
 
     // On mainnet, include an extra onlySignOn parameter.
     if (this.networkId === 1) {
@@ -146,7 +145,7 @@ export default class Onboarding {
     const signature = await this.onBoardingSigner.sign(
       ethereumAddress,
       signingMethod,
-      message,
+      message
     );
     return keyPairFromData(Buffer.from(stripHexPrefix(signature), 'hex'));
   }
@@ -161,13 +160,15 @@ export default class Onboarding {
    */
   async recoverDefaultApiCredentials(
     ethereumAddress: string,
-    signingMethod: SigningMethod = SigningMethod.TypedData,
+    signingMethod: SigningMethod = SigningMethod.TypedData
   ): Promise<ApiKeyCredentials> {
     if (!KEY_DERIVATION_SUPPORTED_SIGNING_METHODS.includes(signingMethod)) {
       throw new Error('Unsupported signing method for API key derivation');
     }
 
-    const message: OnboardingAction = { action: OnboardingActionString.ONBOARDING };
+    const message: OnboardingAction = {
+      action: OnboardingActionString.ONBOARDING,
+    };
 
     // On mainnet, include an extra onlySignOn parameter.
     if (this.networkId === 1) {
@@ -177,7 +178,7 @@ export default class Onboarding {
     const signature = await this.onBoardingSigner.sign(
       ethereumAddress,
       signingMethod,
-      message,
+      message
     );
     const buffer = Buffer.from(stripHexPrefix(signature), 'hex');
 
@@ -212,7 +213,8 @@ function uuidFormatKey(keyBuffer: Buffer): string {
 }
 
 function toBase64Url(base64: Buffer): string {
-  return base64.toString('base64')
+  return base64
+    .toString('base64')
     .replace(/=/g, '')
     .replace(/\+/g, '-')
     .replace(/\//g, '_');

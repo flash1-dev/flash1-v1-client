@@ -5,19 +5,20 @@ import { Address, SignatureTypes } from '../types';
 /**
  * Ethereum signed message prefix without message length.
  */
-export const PREPEND_PERSONAL: string = '\x19Ethereum Signed Message:\n';
+export const PREPEND_PERSONAL = '\x19Ethereum Signed Message:\n';
 
 /**
  * Ethereum signed message prefix, 32-byte message, with message length represented as a string.
  */
-export const PREPEND_DEC: string = '\x19Ethereum Signed Message:\n32';
+export const PREPEND_DEC = '\x19Ethereum Signed Message:\n32';
 
 /**
  * Ethereum signed message prefix, 32-byte message, with message length as a one-byte integer.
  */
-export const PREPEND_HEX: string = '\x19Ethereum Signed Message:\n\x20';
+export const PREPEND_HEX = '\x19Ethereum Signed Message:\n\x20';
 
-export const EIP712_DOMAIN_STRING: string = 'EIP712Domain(string name,string version,uint256 chainId,address verifyingContract)';
+export const EIP712_DOMAIN_STRING =
+  'EIP712Domain(string name,string version,uint256 chainId,address verifyingContract)';
 
 export const EIP712_DOMAIN_STRUCT = [
   { name: 'name', type: 'string' },
@@ -26,7 +27,8 @@ export const EIP712_DOMAIN_STRUCT = [
   { name: 'verifyingContract', type: 'address' },
 ];
 
-export const EIP712_DOMAIN_STRING_NO_CONTRACT: string = 'EIP712Domain(string name,string version,uint256 chainId)';
+export const EIP712_DOMAIN_STRING_NO_CONTRACT =
+  'EIP712Domain(string name,string version,uint256 chainId)';
 
 export const EIP712_DOMAIN_STRUCT_NO_CONTRACT = [
   { name: 'name', type: 'string' },
@@ -34,9 +36,7 @@ export const EIP712_DOMAIN_STRUCT_NO_CONTRACT = [
   { name: 'chainId', type: 'uint256' },
 ];
 
-export function isValidSigType(
-  sigType: number,
-): boolean {
+export function isValidSigType(sigType: number): boolean {
   switch (sigType) {
     case SignatureTypes.NO_PREPEND:
     case SignatureTypes.DECIMAL:
@@ -56,7 +56,7 @@ export function isValidSigType(
  */
 export function ecRecoverTypedSignature(
   hashOrMessage: string,
-  typedSignature: string,
+  typedSignature: string
 ): Address {
   const sigType = parseInt(typedSignature.slice(-2), 16);
 
@@ -71,10 +71,16 @@ export function ecRecoverTypedSignature(
       break;
     }
     case SignatureTypes.DECIMAL:
-      prependedHash = ethers.utils.solidityKeccak256(['string', 'bytes32'], [PREPEND_DEC, hashOrMessage]);
+      prependedHash = ethers.utils.solidityKeccak256(
+        ['string', 'bytes32'],
+        [PREPEND_DEC, hashOrMessage]
+      );
       break;
     case SignatureTypes.HEXADECIMAL:
-      prependedHash = ethers.utils.solidityKeccak256(['string', 'bytes32'], [PREPEND_HEX, hashOrMessage]);
+      prependedHash = ethers.utils.solidityKeccak256(
+        ['string', 'bytes32'],
+        [PREPEND_HEX, hashOrMessage]
+      );
       break;
     default:
       throw new Error(`Invalid signature type: ${sigType}`);
@@ -83,12 +89,15 @@ export function ecRecoverTypedSignature(
   const signature = typedSignature.slice(0, -2);
 
   // Non-null assertion operator is safe, hash is null only on empty input.
-  return ethers.utils.recoverAddress(ethers.utils.arrayify(prependedHash!), signature);
+  return ethers.utils.recoverAddress(
+    ethers.utils.arrayify(prependedHash!),
+    signature
+  );
 }
 
 export function createTypedSignature(
   signature: string,
-  sigType: number,
+  sigType: number
 ): string {
   if (!isValidSigType(sigType)) {
     throw new Error(`Invalid signature type: ${sigType}`);
@@ -99,9 +108,7 @@ export function createTypedSignature(
 /**
  * Fixes any signatures that don't have a 'v' value of 27 or 28
  */
-export function fixRawSignature(
-  signature: string,
-): string {
+export function fixRawSignature(signature: string): string {
   const stripped = stripHexPrefix(signature);
 
   if (stripped.length !== 130) {
@@ -135,17 +142,23 @@ export function stripHexPrefix(input: string) {
 
 export function addressesAreEqual(
   addressOne: string,
-  addressTwo: string,
+  addressTwo: string
 ): boolean {
   if (!addressOne || !addressTwo) {
     return false;
   }
 
-  return (stripHexPrefix(addressOne).toLowerCase() === stripHexPrefix(addressTwo).toLowerCase());
+  return (
+    stripHexPrefix(addressOne).toLowerCase() ===
+    stripHexPrefix(addressTwo).toLowerCase()
+  );
 }
 
 export function hashString(input: string): string {
-  const hash: string | null = ethers.utils.solidityKeccak256(['string'], [input]);
+  const hash: string | null = ethers.utils.solidityKeccak256(
+    ['string'],
+    [input]
+  );
   if (hash === null) {
     throw new Error(`soliditySha3 input was empty: ${input}`);
   }

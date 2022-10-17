@@ -11,7 +11,9 @@
     "build": "rm -rf dist/ && webpack --mode production",
     "start": "node build/src/index.js",
     "test": "NODE_ENV=test jest",
-    "test:watch": "npm test -- --watch"
+    "test:watch": "npm test -- --watch",
+    "lint": "eslint ./src/** --max-warnings=0",
+    "lint-fix": "eslint ./src/** --fix --max-warnings=0"
   },
   "keywords": [
     "flash1",

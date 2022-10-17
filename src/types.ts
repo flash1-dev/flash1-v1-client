@@ -9,9 +9,9 @@ import { HttpProvider, IpcProvider, WebsocketProvider } from 'web3-core';
 
 export { Account as EthereumAccount } from 'web3-core';
 
-export { EthSigner } from '@flash1-exchange/starkex-eth'
+export { EthSigner } from '@flash1-exchange/starkex-eth';
 
-export * from './lib/axios/types'
+export * from './lib/axios/types';
 export type Signer = EthersSigner | Wallet | VoidSigner;
 
 export type ISO8601 = string;
@@ -33,14 +33,17 @@ export type GenericParams = { [name: string]: any };
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type Data = any;
 
-export { EthConfiguration, Flash1Configuration } from '@flash1-exchange/starkex-eth';
+export {
+  EthConfiguration,
+  Flash1Configuration,
+} from '@flash1-exchange/starkex-eth';
 
 // ============ Credentials ============
 
 export interface ApiKeyCredentials {
-  key: string,
-  secret: string,
-  passphrase: string,
+  key: string;
+  secret: string;
+  passphrase: string;
 }
 
 // ============ Enums ============
@@ -93,7 +96,7 @@ export enum TimeInForce {
 export enum PositionStatus {
   OPEN = 'Open',
   CLOSED = 'Closed',
-  SELF_TRADING = 'Canceled, Self-trading'
+  SELF_TRADING = 'Canceled, Self-trading',
 }
 
 export enum OrderStatus {
@@ -110,14 +113,14 @@ export enum AccountAction {
 }
 
 export enum SigningMethod {
-  Compatibility = 'Compatibility',   // picks intelligently between UnsafeHash and Hash
-  UnsafeHash = 'UnsafeHash',         // raw hash signed
-  Hash = 'Hash',                     // hash prepended according to EIP-191
-  TypedData = 'TypedData',           // order hashed according to EIP-712
-  MetaMask = 'MetaMask',             // order hashed according to EIP-712 (MetaMask-only)
+  Compatibility = 'Compatibility', // picks intelligently between UnsafeHash and Hash
+  UnsafeHash = 'UnsafeHash', // raw hash signed
+  Hash = 'Hash', // hash prepended according to EIP-191
+  TypedData = 'TypedData', // order hashed according to EIP-712
+  MetaMask = 'MetaMask', // order hashed according to EIP-712 (MetaMask-only)
   MetaMaskLatest = 'MetaMaskLatest', // ... according to latest version of EIP-712 (MetaMask-only)
   CoinbaseWallet = 'CoinbaseWallet', // ... according to latest version of EIP-712 (CoinbaseWallet)
-  Personal = 'Personal',             // message signed with personal_sign //  NOT SUPPORTED
+  Personal = 'Personal', // message signed with personal_sign //  NOT SUPPORTED
 }
 
 export enum SignatureTypes {
@@ -195,7 +198,7 @@ export interface ApiOrder extends ApiStarkwareSigned {
   timeInForce: TimeInForce;
   postOnly: boolean;
   hidden: boolean;
-  limitFee: string;  // fee limit in rate
+  limitFee: string; // fee limit in rate
   clientId: string;
   leverage: number;
   userCollateral: number;
@@ -368,14 +371,14 @@ export interface UserResponseObject {
 }
 
 export interface AccountResponseObject {
-  starkKey: string,
-  positionId: string,
-  equity: string,
-  freeCollateral: string,
-  pendingDeposits: string,
-  pendingWithdrawals: string,
-  openPositions: PositionsMap,
-  accountNumber: string,
+  starkKey: string;
+  positionId: string;
+  equity: string;
+  freeCollateral: string;
+  pendingDeposits: string;
+  pendingWithdrawals: string;
+  openPositions: PositionsMap;
+  accountNumber: string;
   id: string;
   quoteBalance: string;
 }
@@ -383,7 +386,7 @@ export interface AccountResponseObject {
 export interface TransferResponseObject {
   id: string;
   type: string;
-  debitAsset: TradableAsset
+  debitAsset: TradableAsset;
   creditAsset: TradableAsset;
   debitAmount: string;
   creditAmount: string;
@@ -428,8 +431,8 @@ export interface OrderbookResponseOrder {
 }
 
 export interface OrderbookResponseObject {
-  bids: OrderbookResponseOrder[],
-  asks: OrderbookResponseOrder[],
+  bids: OrderbookResponseOrder[];
+  asks: OrderbookResponseOrder[];
 }
 
 export interface CandleResponseObject {
@@ -529,18 +532,18 @@ export interface AccountLeaderboardPnlResponseObject {
 }
 
 export interface HistoricalLeaderboardPnlObject {
-  period: LeaderboardPnlPeriod,
-  absolutePnl: string,
-  percentPnl: string,
-  absoluteRank: number | null,
-  percentRank: number | null,
-  updatedAt: ISO8601,
-  startedAt: ISO8601 | null,
-  endsAt: ISO8601 | null,
-  seasonOutcome: LeaguesExpectedOutcome | null,
-  seasonNumber: number | null,
-  hedgieWon: number | null,
-  prizeWon: string | null,
+  period: LeaderboardPnlPeriod;
+  absolutePnl: string;
+  percentPnl: string;
+  absoluteRank: number | null;
+  percentRank: number | null;
+  updatedAt: ISO8601;
+  startedAt: ISO8601 | null;
+  endsAt: ISO8601 | null;
+  seasonOutcome: LeaguesExpectedOutcome | null;
+  seasonNumber: number | null;
+  hedgieWon: number | null;
+  prizeWon: string | null;
 }
 
 export interface HistoricalLeaderboardPnlsResponseObject {
@@ -560,134 +563,135 @@ export interface LiquidityProviderQuote {
 }
 
 export interface Trade {
-  side: OrderSide,
-  size: string,
-  price: string,
-  createdAt: ISO8601,
+  side: OrderSide;
+  size: string;
+  price: string;
+  createdAt: ISO8601;
 }
 
 export interface TradingRewardsResponseObject {
-  epoch: number,
-  epochStart: ISO8601,
-  epochEnd: ISO8601,
-  fees: Fees,
-  openInterest: OpenInterest,
-  weight: Weight,
-  stakedFLASH1: StakedFLASH1IncludingFloor,
-  totalRewards: string,
-  estimatedRewards: string,
+  epoch: number;
+  epochStart: ISO8601;
+  epochEnd: ISO8601;
+  fees: Fees;
+  openInterest: OpenInterest;
+  weight: Weight;
+  stakedFLASH1: StakedFLASH1IncludingFloor;
+  totalRewards: string;
+  estimatedRewards: string;
 }
 
 export interface Fees {
-  feesPaid: string,
-  totalFeesPaid: string,
+  feesPaid: string;
+  totalFeesPaid: string;
 }
 
 export interface OpenInterest {
-  averageOpenInterest: string,
-  totalAverageOpenInterest: string,
+  averageOpenInterest: string;
+  totalAverageOpenInterest: string;
 }
 
 export interface Weight {
-  weight: string,
-  totalWeight: string,
+  weight: string;
+  totalWeight: string;
 }
 
 export interface StakedFLASH1 {
-  averageStakedFLASH1: string,
-  totalAverageStakedFLASH1: string,
+  averageStakedFLASH1: string;
+  totalAverageStakedFLASH1: string;
 }
 
 export interface StakedFLASH1IncludingFloor extends StakedFLASH1 {
-  averageStakedFLASH1WithFloor: string,
+  averageStakedFLASH1WithFloor: string;
 }
 
 export interface LiquidityProviderRewardsResponseObject {
-  epoch: number,
-  epochStart: ISO8601,
-  epochEnd: ISO8601,
+  epoch: number;
+  epochStart: ISO8601;
+  epochEnd: ISO8601;
   markets: {
-    [market: string]: LiquidityRewards,
-  },
-  stakedFLASH1: StakedFLASH1,
+    [market: string]: LiquidityRewards;
+  };
+  stakedFLASH1: StakedFLASH1;
 }
 
 export interface LiquidityRewards {
-  market: ListedMarket,
-  uptime: string,
-  score: string,
-  totalScore: string,
-  totalRewards: string,
-  estimatedRewards: string,
+  market: ListedMarket;
+  uptime: string;
+  score: string;
+  totalScore: string;
+  totalRewards: string;
+  estimatedRewards: string;
 }
 
 export interface RetroactiveMiningRewardsResponseObject {
-  epoch: number,
-  epochStart: ISO8601,
-  epochEnd: ISO8601,
-  retroactiveMining: RetroactiveMiningRewards,
-  estimatedRewards: string,
+  epoch: number;
+  epochStart: ISO8601;
+  epochEnd: ISO8601;
+  retroactiveMining: RetroactiveMiningRewards;
+  estimatedRewards: string;
 }
 
 export interface RetroactiveMiningRewards {
-  allocation: string,
-  targetVolume: string,
-  volume: string,
+  allocation: string;
+  targetVolume: string;
+  volume: string;
 }
 
 export interface PublicRetroactiveMiningRewardsResponseObject {
-  allocation: string,
-  targetVolume: string,
+  allocation: string;
+  targetVolume: string;
 }
 
 export interface HedgiePeriodResponseObject {
-  blockNumber: number,
-  competitionPeriod: number,
-  tokenIds: string[],
+  blockNumber: number;
+  competitionPeriod: number;
+  tokenIds: string[];
 }
 
 export interface RestrictionResponseObject {
-  isRestricted: boolean,
-  restrictionType: AddressRestrictionType | null,
-  canTrade: boolean,
-  canTransfer: boolean,
-  canFastWithdraw: boolean,
-  canSlowWithdraw: boolean,
-  reason: string | null,
+  isRestricted: boolean;
+  restrictionType: AddressRestrictionType | null;
+  canTrade: boolean;
+  canTransfer: boolean;
+  canFastWithdraw: boolean;
+  canSlowWithdraw: boolean;
+  reason: string | null;
 }
 
 export interface UserComplianceResponseObject {
-  isBanned: boolean,
-  reason: string | null,
+  isBanned: boolean;
+  reason: string | null;
 }
 
 export interface ProfilePublicResponseObject {
-  username: string | null,
-  ethereumAddress: string | null,
-  FLASH1Holdings: string | null,
-  stakedFLASH1Holdings: string | null,
-  hedgiesHeld: number[],
-  twitterHandle: string | null,
+  username: string | null;
+  ethereumAddress: string | null;
+  FLASH1Holdings: string | null;
+  stakedFLASH1Holdings: string | null;
+  hedgiesHeld: number[];
+  twitterHandle: string | null;
   tradingLeagues: {
-    currentLeague: string | null,
-    currentLeagueRanking: number | null,
-  },
+    currentLeague: string | null;
+    currentLeagueRanking: number | null;
+  };
   tradingPnls: {
-    absolutePnl30D: string | null,
-    percentPnl30D: string | null,
-    volume30D: string,
-  },
+    absolutePnl30D: string | null;
+    percentPnl30D: string | null;
+    volume30D: string;
+  };
 }
 
 export type Decimal = BigNumber;
 
-export interface ProfilePrivateResponseObject extends ProfilePublicResponseObject {
-  publicId: string,
+export interface ProfilePrivateResponseObject
+  extends ProfilePublicResponseObject {
+  publicId: string;
   tradingRewards: {
-    curEpoch: number,
-    curEpochEstimatedRewards: Decimal,
-    prevEpochEstimatedRewards: Decimal,
-  },
+    curEpoch: number;
+    curEpochEstimatedRewards: Decimal;
+    prevEpochEstimatedRewards: Decimal;
+  };
 }
 
 export interface KeyPair {
@@ -722,10 +726,10 @@ export interface OnboardingAction {
 }
 
 export interface EthPrivateAction {
-  method: string,
-  requestPath: string,
-  body: string,
-  timestamp: string,
+  method: string;
+  requestPath: string;
+  body: string;
+  timestamp: string;
 }
 
 // ============ Utility Types ============
