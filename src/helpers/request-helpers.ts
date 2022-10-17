@@ -44,3 +44,13 @@ export function getDefaultVaultId(starkPublicKey: string) {
 export function hexToBn(hex: string): BN {
   return new BN(stripHexPrefix(hex), 16);
 }
+
+/**
+ * Prefixes `0x` in case that prefix doesn't exist
+ */
+ export function addHexPrefix(hex: string): string {
+  if (!hex.startsWith('0x')) {
+    return `0x${hex}`
+  }
+  return hex
+}

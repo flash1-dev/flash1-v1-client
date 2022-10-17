@@ -1,4 +1,3 @@
-import { Decimal } from '@flash1-exchange/starkex-eth';
 import {
   Flash1Asset,
   Flash1Market,
@@ -9,6 +8,8 @@ import { Wallet, VoidSigner, Signer as EthersSigner } from 'ethers';
 import { HttpProvider, IpcProvider, WebsocketProvider } from 'web3-core';
 
 export { Account as EthereumAccount } from 'web3-core';
+
+export { EthSigner } from '@flash1-exchange/starkex-eth'
 
 export * from './lib/axios/types'
 export type Signer = EthersSigner | Wallet | VoidSigner;
@@ -32,7 +33,7 @@ export type GenericParams = { [name: string]: any };
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type Data = any;
 
-export { SendOptions as EthereumSendOptions } from '@flash1-exchange/starkex-eth';
+export { EthConfiguration, Flash1Configuration } from '@flash1-exchange/starkex-eth';
 
 // ============ Credentials ============
 
@@ -674,6 +675,8 @@ export interface ProfilePublicResponseObject {
     volume30D: string,
   },
 }
+
+export type Decimal = BigNumber;
 
 export interface ProfilePrivateResponseObject extends ProfilePublicResponseObject {
   publicId: string,

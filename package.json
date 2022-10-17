@@ -24,7 +24,7 @@
   "author": "flash1 & dydx",
   "license": "Apache-2.0",
   "dependencies": {
-    "@flash1-exchange/starkex-eth": "^0.1.7",
+    "@flash1-exchange/starkex-eth": "^0.1.9",
     "@flash1-exchange/starkex-lib": "^1.1.0",
     "axios": "^0.21.1",
     "bignumber.js": "9.0.1",

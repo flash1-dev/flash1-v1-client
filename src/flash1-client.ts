@@ -1,3 +1,8 @@
+import {
+  asEcKeyPair,
+  asSimpleKeyPair
+} from '@flash1-exchange/starkex-lib';
+import { Flash1 as Flash1Eth, Config } from '@flash1-exchange/starkex-eth';
 import Clock from './modules/clock';
 import EthPrivate from './modules/eth-private';
 import Onboarding from './modules/onboarding';
@@ -5,27 +10,25 @@ import Private from './modules/private';
 import Public from './modules/public';
 import {
   ApiKeyCredentials,
-  EthereumSendOptions,
   Signer,
   KeyPair,
 } from './types';
+import { addHexPrefix } from './helpers/request-helpers';
 
 export interface ClientOptions {
   apiTimeout?: number;
-  ethSendOptions?: EthereumSendOptions;
   networkId?: number;
   starkPrivateKey?: string | KeyPair;
   signer?: Signer;
+  ethAddress?: string
   apiKeyCredentials?: ApiKeyCredentials;
   timestampAdjustment?: number;
 }
 
-type StarkwareLib = unknown;
-
 export class Flash1Client {
   readonly host: string;
   readonly apiTimeout?: number;
-  readonly ethSendOptions?: EthereumSendOptions;
+  readonly ethAddress?: string
   readonly networkId: number;
   readonly signer?: Signer;
   apiKeyCredentials?: ApiKeyCredentials;
@@ -39,7 +42,7 @@ export class Flash1Client {
   private _private?: Private;
   private _ethPrivate?: EthPrivate;
   private _onboarding?: Onboarding;
-  private _eth?: StarkwareLib;
+  private _eth?: Flash1Eth;
 
   constructor(
     host: string,
@@ -47,11 +50,11 @@ export class Flash1Client {
   ) {
     this.host = host;
     this.apiTimeout = options.apiTimeout;
-    this.ethSendOptions = options.ethSendOptions;
     this.networkId = typeof options.networkId === 'number' ? options.networkId : 1;
     this.starkPrivateKey = options.starkPrivateKey;
     this.apiKeyCredentials = options.apiKeyCredentials;
     this.signer = options.signer;
+    this.ethAddress = options.ethAddress
 
     // Modules.
     this._public = new Public(host);
@@ -131,29 +134,33 @@ export class Flash1Client {
     return this._onboarding;
   }
 
-  /** ****************
-
-   TODO: FIX THIS
-  /****************** */
   /**
    * Get the eth module, used for interacting with Ethereum smart contracts.
    */
-  //   get eth() {
-  //     if (!this._eth) {
-  //       if (this.signer) {
-  //         this._eth = new StarkwareLib(
-  //           this.signer.currentProvider,
-  //           this.networkId,
-  //           this.ethSendOptions,
-  //         );
-  //       } else {
-  //         return notSupported(
-  //           'Eth endpoints are not supported since neither web3 nor web3Provider was provided',
-  //         ) as StarkwareLib;
-  //       }
-  //     }
-  //     return this._eth;
-  //   }
+    get eth() {
+      if (!this._eth) {
+        if (this.signer && this.starkPrivateKey && this.ethAddress) {
+          const starkPrivateKey = (typeof this.starkPrivateKey == 'string') ? this.starkPrivateKey : this.starkPrivateKey.privateKey
+          const starkKeypair = asSimpleKeyPair(asEcKeyPair(starkPrivateKey))
+          console.log('CONFIGGGGGGGG', this.networkId == 1 ? Config.MAINNET : Config.GOERLI)
+          this._eth = new Flash1Eth(this.networkId == 1 ? Config.MAINNET : Config.GOERLI, {
+            starkex: {
+              publicKey: addHexPrefix(starkKeypair.publicKey),
+              privateKey: addHexPrefix(starkPrivateKey.toString()),
+            },
+            ethereum: {
+              publicKey: this.ethAddress,
+              privateKey: '',
+            },
+          });
+        } else {
+          return notSupported(
+            `Eth endpoints are not supported since neither signer nor starkPrivateKey were provided`,
+          ) as Flash1Eth;
+        }
+      }
+      return this._eth;
+    }
 
   setStarkPrivateKey(privateOrKeyPair: string | KeyPair) {
     this.starkPrivateKey = privateOrKeyPair;
