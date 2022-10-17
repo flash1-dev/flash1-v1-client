@@ -23,6 +23,8 @@ export interface ClientOptions {
   ethAddress?: string
   apiKeyCredentials?: ApiKeyCredentials;
   timestampAdjustment?: number;
+  flashloanAccount?: string;
+  insuranceAccount?: string;
 }
 
 export class Flash1Client {
@@ -31,6 +33,8 @@ export class Flash1Client {
   readonly ethAddress?: string
   readonly networkId: number;
   readonly signer?: Signer;
+  readonly flashloanAccount?: string;
+  readonly insuranceAccount?: string;
   apiKeyCredentials?: ApiKeyCredentials;
   starkPrivateKey?: string | KeyPair;
 
@@ -55,6 +59,8 @@ export class Flash1Client {
     this.apiKeyCredentials = options.apiKeyCredentials;
     this.signer = options.signer;
     this.ethAddress = options.ethAddress
+    this.flashloanAccount = options.flashloanAccount;
+    this.insuranceAccount = options.insuranceAccount;
 
     // Modules.
     this._public = new Public(host);
@@ -87,6 +93,8 @@ export class Flash1Client {
           starkPrivateKey: this.starkPrivateKey,
           networkId: this.networkId,
           clock: this._clock,
+          flashloanAccount: this.flashloanAccount,
+          insuranceAccount: this.insuranceAccount
         });
       } else {
         return notSupported(

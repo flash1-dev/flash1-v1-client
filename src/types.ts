@@ -190,20 +190,23 @@ export interface ApiOrder extends ApiStarkwareSigned {
   instrument: ListedMarket;
   side: OrderSide;
   type: OrderType;
-  quantity: string;
+  quantity?: string;
   price: string;
   timeInForce: TimeInForce;
   postOnly: boolean;
   hidden: boolean;
-  limitFee: string;
+  limitFee: string;  // fee limit in rate
   clientId: string;
+  leverage: number;
+  userCollateral: number;
 }
 
 export interface ApiOrderWithFlashloan extends ApiOrder {
-  flashloan: number
-  flashloanSignature: string
-  insuranceSignature: string
-  closingOrderSignature: string
+  flashloan: number;
+  duration: number;
+  flashloanSignature: string;
+  insuranceSignature: string;
+  closingOrderSignature: string;
 }
 
 export interface ApiWithdrawal extends ApiStarkwareSigned {

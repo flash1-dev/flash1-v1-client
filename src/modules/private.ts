@@ -8,16 +8,22 @@ import {
   asEcKeyPair,
   asSimpleKeyPair,
   TransferParams,
-  StarkwareOrderSide
+  StarkwareOrderSide,
+  ASSET_RESOLUTION,
+  FLASH1_CONTRACT_SIZE,
+  SYNTHETIC_ASSET_MAP,
+  REVERSE_SYNTHETIC_ASSET_MAP,
+  SyntheticAsset,
 } from '@flash1-exchange/starkex-lib';
 import crypto from 'crypto-js';
 import isEmpty from 'lodash/isEmpty';
 
-import { generateQueryPath, generateRandomClientId, getDefaultVaultId } from '../helpers/request-helpers';
 import {
-  RequestMethod,
-  axiosRequest,
-} from '../lib/axios';
+  generateQueryPath,
+  generateRandomClientId,
+  getDefaultVaultId,
+} from '../helpers/request-helpers';
+import { RequestMethod, axiosRequest } from '../lib/axios';
 import { getAccountId } from '../lib/db';
 import {
   AccountAction,
@@ -53,7 +59,7 @@ import {
   ProfilePrivateResponseObject,
   HistoricalLeaderboardPnlsResponseObject,
   Provider,
-  ApiOrderWithFlashloan
+  ApiOrderWithFlashloan,
 } from '../types';
 import Clock from './clock';
 
@@ -83,14 +89,16 @@ export default class Private {
     starkPrivateKey,
     networkId,
     clock,
-    flashloanAccount
+    flashloanAccount,
+    insuranceAccount,
   }: {
-    host: string,
-    apiKeyCredentials: ApiKeyCredentials,
-    networkId: number,
-    starkPrivateKey?: string | KeyPair,
-    clock: Clock,
-    flashloanAccount?: string
+    host: string;
+    apiKeyCredentials: ApiKeyCredentials;
+    networkId: number;
+    starkPrivateKey?: string | KeyPair;
+    clock: Clock;
+    flashloanAccount?: string;
+    insuranceAccount?: string;
   }) {
     this.host = host;
     this.apiKeyCredentials = apiKeyCredentials;
@@ -101,6 +109,7 @@ export default class Private {
     }
     this.clock = clock;
     this.flashloanAccount = flashloanAccount;
+    this.insuranceAccount = insuranceAccount;
   }
 
   // ============ Request Helpers ============
@@ -108,7 +117,7 @@ export default class Private {
   protected async request(
     method: RequestMethod,
     endpoint: string,
-    data?: {},
+    data?: {}
   ): Promise<Data> {
     const requestPath = `/api/v1/private/${endpoint}`;
     const isoTimestamp: ISO8601 = this.clock.getAdjustedIsoString();
@@ -131,65 +140,51 @@ export default class Private {
     });
   }
 
-  protected async _get(
-    endpoint: string,
-    params: {},
-  ): Promise<Data> {
+  protected async _get(endpoint: string, params: {}): Promise<Data> {
     return this.request(RequestMethod.GET, generateQueryPath(endpoint, params));
   }
 
-  protected async post(
-    endpoint: string,
-    data: {},
-  ): Promise<Data> {
+  protected async post(endpoint: string, data: {}): Promise<Data> {
     return this.request(RequestMethod.POST, endpoint, data);
   }
 
-  protected async put(
-    endpoint: string,
-    data: {},
-  ): Promise<Data> {
+  protected async put(endpoint: string, data: {}): Promise<Data> {
     return this.request(RequestMethod.PUT, endpoint, data);
   }
 
-  protected async delete(
-    endpoint: string,
-    params: {},
-  ): Promise<Data> {
-    return this.request(RequestMethod.DELETE, generateQueryPath(endpoint, params));
+  protected async delete(endpoint: string, params: {}): Promise<Data> {
+    return this.request(
+      RequestMethod.DELETE,
+      generateQueryPath(endpoint, params)
+    );
   }
 
   // ============ Requests ============
 
   async get(endpoint: string, params: {}): Promise<Data> {
-    return this._get(
-      endpoint,
-      params,
-    );
+    return this._get(endpoint, params);
   }
 
   /**
    * @description get a signature for the ethereumAddress if registered
    */
-  async getRegistration(genericParams: GenericParams = {}): Promise<{ signature: string }> {
-    return this._get(
-      'registration',
-      {
-        ...genericParams,
-      },
-    );
+  async getRegistration(
+    genericParams: GenericParams = {}
+  ): Promise<{ signature: string }> {
+    return this._get('registration', {
+      ...genericParams,
+    });
   }
 
   /**
    * @description get the user associated with the ethereumAddress
    */
-  async getUser(genericParams: GenericParams = {}): Promise<{ user: UserResponseObject }> {
-    return this._get(
-      'users',
-      {
-        ...genericParams,
-      },
-    );
+  async getUser(
+    genericParams: GenericParams = {}
+  ): Promise<{ user: UserResponseObject }> {
+    return this._get('users', {
+      ...genericParams,
+    });
   }
 
   // Not yet supported
@@ -261,24 +256,20 @@ export default class Private {
    */
   async getAccount(
     ethereumAddress: string,
-    genericParams: GenericParams = {},
+    genericParams: GenericParams = {}
   ): Promise<{ account: AccountResponseObject }> {
-    return this._get(
-      `accounts/${getAccountId({ address: ethereumAddress })}`,
-      { ...genericParams },
-    );
+    return this._get(`accounts/${getAccountId({ address: ethereumAddress })}`, {
+      ...genericParams,
+    });
   }
 
   /**
    * @description get all accounts associated with an ethereumAddress
    */
   async getAccounts(
-    genericParams: GenericParams = {},
+    genericParams: GenericParams = {}
   ): Promise<{ accounts: AccountResponseObject[] }> {
-    return this._get(
-      'accounts',
-      { ...genericParams },
-    );
+    return this._get('accounts', { ...genericParams });
   }
 
   // Not yet supported
@@ -329,10 +320,7 @@ export default class Private {
    * @description get all positions for an account, meeting query parameters
    */
   async getPositions(): Promise<{ positions: PositionResponseObject[] }> {
-    return this._get(
-      'positions',
-      {},
-    );
+    return this._get('positions', {});
   }
 
   // Not supported yet
@@ -421,10 +409,16 @@ export default class Private {
    * @param clientId of the order
    */
   async getOpenOrders(): Promise<{ order: OrderResponseObject[] }> {
-    return this._get(
-      'openorders',
-      {},
-    );
+    return this._get('openorders', {});
+  }
+
+  /**
+   * @description get an order by a clientId
+   *
+   * @param clientId of the order
+   */
+  async getOpenPositions(): Promise<{ order: OrderResponseObject[] }> {
+    return this._get('positions', {});
   }
 
   /**
@@ -441,19 +435,35 @@ export default class Private {
    * @limitFee of the order
    * @expiration of the order
    * @hidden if the order should remain hidden in the orderbook
-   * @timeInForce 
+   * @timeInForce
    * }
    * @param positionId associated with the order
    */
   async submitOrder(
-    params: PartialBy<ApiOrder, 'signature' | 'clientId'>,
+    params: PartialBy<ApiOrder, 'signature' | 'clientId'>
   ): Promise<{ order: OrderResponseObject }> {
     const clientId = generateRandomClientId();
     let signature: string | undefined = params.signature;
     if (!signature) {
       if (!this.starkKeyPair) {
-        throw new Error('Order is not signed and client was not initialized with starkPrivateKey');
+        throw new Error(
+          'Order is not signed and client was not initialized with starkPrivateKey'
+        );
       }
+      if (typeof params.quantity === 'undefined') {
+        params.quantity = this.getHumanReadableQuantity(
+          SYNTHETIC_ASSET_MAP[params.instrument],
+          params.userCollateral,
+          params.leverage,
+          params.price
+        );
+      } else {
+        params.quantity = this.getFlash1QuantizedQuantity(
+          SYNTHETIC_ASSET_MAP[params.instrument],
+          params.quantity
+        );
+      }
+
       const orderToSign: OrderWithClientId = {
         humanSize: params.quantity,
         humanPrice: params.price,
@@ -462,7 +472,7 @@ export default class Private {
         side: params.side,
         expirationIsoTimestamp: params.expiration,
         positionId: this.defaultPositionId,
-        clientId
+        clientId,
       };
       const starkOrder = SignableOrder.fromOrder(orderToSign, this.networkId);
       signature = await starkOrder.sign(this.starkKeyPair);
@@ -474,47 +484,68 @@ export default class Private {
       signature,
     };
 
-    return this.post(
-      'order',
-      order,
-    );
+    return this.post('order', order);
   }
 
-
   /**
- *@description place a new short term order
- *
- * @param {
- * @instrument of the order (market)
- * @side of the order
- * @orderType of the order
- * @timeInForce of the order
- * @postOnly of the order
- * @size of the order
- * @price of the order
- * @limitFee of the order
- * @expiration of the order
- * @hidden if the order should remain hidden in the orderbook
- * @flashloan the borrowing amount
- * @timeInForce 
- * }
- * @param positionId associated with the order
- */
+   *@description place a new short term order
+   *
+   * @param {
+   * @instrument of the order (market)
+   * @side of the order
+   * @orderType of the order
+   * @timeInForce of the order
+   * @postOnly of the order
+   * @size of the order
+   * @price of the order
+   * @limitFee of the order
+   * @expiration of the order
+   * @hidden if the order should remain hidden in the orderbook
+   * @flashloan the borrowing amount
+   * @timeInForce
+   * }
+   * @param positionId associated with the order
+   */
   async submitShortTermOrder(
-    params: PartialBy<ApiOrderWithFlashloan, 'signature' | 'flashloanSignature' | 'insuranceSignature' | 'closingOrderSignature' | 'clientId'>,
+    params: PartialBy<
+      ApiOrderWithFlashloan,
+      | 'signature'
+      | 'flashloanSignature'
+      | 'insuranceSignature'
+      | 'closingOrderSignature'
+      | 'clientId'
+    >
   ): Promise<{ order: OrderResponseObject }> {
     const clientId = generateRandomClientId();
-    var clientId2 = parseInt(clientId, 10) + 1;
-    var clientId3 = clientId2 + 1;
-    var clientId4 = clientId3 + 1;
+    const clientId2 = parseInt(clientId, 10) + 1;
+    const clientId3 = clientId2 + 1;
+    const clientId4 = clientId3 + 1;
     let signature: string | undefined = params.signature;
     let flashloanSignature: string | undefined = params.flashloanSignature;
     let insuranceSignature: string | undefined = params.insuranceSignature;
-    let closingOrderSignature: string | undefined = params.closingOrderSignature;
+    let closingOrderSignature: string | undefined =
+      params.closingOrderSignature;
     if (!signature) {
       if (!this.starkKeyPair) {
-        throw new Error('Order is not signed and client was not initialized with starkPrivateKey');
+        throw new Error(
+          'Order is not signed and client was not initialized with starkPrivateKey'
+        );
       }
+
+      if (!params.quantity) {
+        params.quantity = this.getHumanReadableQuantityForFlashLoan(
+          SYNTHETIC_ASSET_MAP[params.instrument],
+          params.flashloan,
+          params.leverage,
+          params.price
+        );
+      } else {
+        params.quantity = this.getFlash1QuantizedQuantity(
+          SYNTHETIC_ASSET_MAP[params.instrument],
+          params.quantity
+        );
+      }
+
       const orderToSign: OrderWithClientId = {
         humanSize: params.quantity,
         humanPrice: params.price,
@@ -523,9 +554,11 @@ export default class Private {
         side: params.side,
         expirationIsoTimestamp: params.expiration,
         positionId: this.defaultPositionId,
-        clientId: clientId
+        clientId: clientId,
       };
+
       const starkOrder = SignableOrder.fromOrder(orderToSign, this.networkId);
+      const closingStamp = starkOrder.toStarkware().expirationEpochHours;
 
       const flashLoanTransferToSign: TransferParams = {
         senderPositionId: this.defaultPositionId,
@@ -534,9 +567,12 @@ export default class Private {
         humanAmount: this.getFlashloanPriceWithInterest(params.flashloan),
         clientId: clientId2.toString(),
         expirationIsoTimestamp: params.expiration,
-      }
-      const flashLoanTransferOrder = SignableTransfer.fromTransfer(flashLoanTransferToSign, this.networkId)
-
+      };
+      const flashLoanTransferOrder = SignableTransfer.fromTransfer(
+        flashLoanTransferToSign,
+        this.networkId
+      );
+      flashLoanTransferOrder.toStarkware().expirationEpochHours = closingStamp;
       const insuranceTransferToSign: TransferParams = {
         senderPositionId: this.defaultPositionId,
         receiverPositionId: getDefaultVaultId(this.insuranceAccount),
@@ -544,28 +580,50 @@ export default class Private {
         humanAmount: this.getInsurancePremium(params.flashloan),
         clientId: clientId3.toString(),
         expirationIsoTimestamp: params.expiration,
-      }
-      const insuranceTransferOrder = SignableTransfer.fromTransfer(insuranceTransferToSign, this.networkId)
-
+      };
+      const insuranceTransferOrder = SignableTransfer.fromTransfer(
+        insuranceTransferToSign,
+        this.networkId
+      );
+      insuranceTransferOrder.toStarkware().expirationEpochHours = closingStamp;
       const closingOrderToSign: OrderWithClientId = {
         humanSize: params.quantity,
         humanPrice: this.getClosingOrderPrice(params.side, params.price),
         limitFee: params.limitFee,
         market: params.instrument,
-        side: params.side === StarkwareOrderSide.BUY ? StarkwareOrderSide.SELL : StarkwareOrderSide.BUY,
+        side:
+          params.side === StarkwareOrderSide.BUY
+            ? StarkwareOrderSide.SELL
+            : StarkwareOrderSide.BUY,
         expirationIsoTimestamp: params.expiration,
         positionId: this.defaultPositionId,
-        clientId: clientId4.toString()
+        clientId: clientId4.toString(),
       };
-      const closingOrder = SignableOrder.fromOrder(closingOrderToSign, this.networkId);
+      const closingOrder = SignableOrder.fromOrder(
+        closingOrderToSign,
+        this.networkId
+      );
+      const cc = starkOrder.toStarkware().quantumsAmountCollateral;
+      const closingAmount = this.getClosingOrderCollateralAmount(
+        params.side,
+        cc
+      );
+      closingOrder.toStarkware().quantumsAmountCollateral = closingAmount;
+      closingOrder.toStarkware().quantumsAmountFee =
+        starkOrder.toStarkware().quantumsAmountFee;
+      closingOrder.toStarkware().expirationEpochHours = closingStamp;
 
-      [signature, flashloanSignature, insuranceSignature, closingOrderSignature] = await Promise.all([
+      [
+        signature,
+        flashloanSignature,
+        insuranceSignature,
+        closingOrderSignature,
+      ] = await Promise.all([
         starkOrder.sign(this.starkKeyPair),
         flashLoanTransferOrder.sign(this.starkKeyPair),
         insuranceTransferOrder.sign(this.starkKeyPair),
-        closingOrder.sign(this.starkKeyPair)
-      ])
-
+        closingOrder.sign(this.starkKeyPair),
+      ]);
     }
 
     const order: ApiOrderWithFlashloan = {
@@ -574,39 +632,32 @@ export default class Private {
       signature,
       flashloanSignature,
       insuranceSignature,
-      closingOrderSignature
+      closingOrderSignature,
     };
 
-    return this.post(
-      'short-term/order',
-      order,
-    );
+    return this.post('short-term/order', order);
   }
-
 
   /**
    * @description cancel a specific order for a user by the order's unique id
    *
    * @param orderId of the order being canceled
    */
-  async cancelOrder(orderId: string, instrument: string): Promise<{ cancelOrder: OrderResponseObject }> {
-    return this.post(
-      `cancel`,
-      {
-        orderID: orderId,
-        instrument: instrument
-      },
-    );
+  async cancelOrder(
+    orderId: string,
+    instrument: string
+  ): Promise<{ cancelOrder: OrderResponseObject }> {
+    return this.post(`cancel`, {
+      orderID: orderId,
+      instrument: instrument,
+    });
   }
 
   /**
    * @description cancel all orders for a user
    */
   async cancelAllOrders(): Promise<{ cancelOrders: OrderResponseObject[] }> {
-    return this.post(
-      'cancelall',
-      {}
-    );
+    return this.post('cancelall', {});
   }
 
   // Not yet supported
@@ -677,19 +728,16 @@ export default class Private {
    */
   async getTransfers(
     params: {
-      type?: AccountAction,
-      limit?: number,
-      createdBeforeOrAt?: ISO8601,
+      type?: AccountAction;
+      limit?: number;
+      createdBeforeOrAt?: ISO8601;
     } = {},
-    genericParams: GenericParams = {},
+    genericParams: GenericParams = {}
   ): Promise<{ transfers: TransferResponseObject[] }> {
-    return this._get(
-      'transfers',
-      {
-        ...params,
-        ...genericParams,
-      },
-    );
+    return this._get('transfers', {
+      ...params,
+      ...genericParams,
+    });
   }
 
   /**
@@ -704,7 +752,7 @@ export default class Private {
    */
   async createWithdrawal(
     params: PartialBy<ApiWithdrawal, 'clientId' | 'signature'>,
-    positionId: string,
+    positionId: string
   ): Promise<{ withdrawal: TransferResponseObject }> {
     const clientId = params.clientId || generateRandomClientId();
 
@@ -712,7 +760,7 @@ export default class Private {
     if (!signature) {
       if (!this.starkKeyPair) {
         throw new Error(
-          'Withdrawal is not signed and client was not initialized with starkPrivateKey',
+          'Withdrawal is not signed and client was not initialized with starkPrivateKey'
         );
       }
       const withdrawalToSign = {
@@ -721,7 +769,10 @@ export default class Private {
         clientId,
         positionId,
       };
-      const starkWithdrawal = SignableWithdrawal.fromWithdrawal(withdrawalToSign, this.networkId);
+      const starkWithdrawal = SignableWithdrawal.fromWithdrawal(
+        withdrawalToSign,
+        this.networkId
+      );
       signature = await starkWithdrawal.sign(this.starkKeyPair);
     }
 
@@ -731,25 +782,22 @@ export default class Private {
       signature,
     };
 
-    return this.post(
-      'withdrawals',
-      withdrawal,
-    );
+    return this.post('withdrawals', withdrawal);
   }
 
   /**
    * @description post a new fast-withdrawal
    *
    * @param {
-    * @creditAmount specifies the size of the withdrawal
-    * @debitAmount specifies the amount to be debited
-    * @creditAsset specifies the asset being withdrawn
-    * @toAddress is the address being withdrawn to
-    * @lpPositionId is the LP positionId for the fast withdrawal
-    * @clientId specifies the clientId for the address
-    * @signature starkware specific signature for fast-withdrawal
-    * }
-    */
+   * @creditAmount specifies the size of the withdrawal
+   * @debitAmount specifies the amount to be debited
+   * @creditAsset specifies the asset being withdrawn
+   * @toAddress is the address being withdrawn to
+   * @lpPositionId is the LP positionId for the fast withdrawal
+   * @clientId specifies the clientId for the address
+   * @signature starkware specific signature for fast-withdrawal
+   * }
+   */
   // async createFastWithdrawal(
   //   {
   //     lpStarkKey,
@@ -799,18 +847,18 @@ export default class Private {
   // }
 
   /**
-     * @description post a new transfer
-     *
-     * @param {
-      * @amount specifies the size of the transfer
-      * @receiverAccountId specifies the receiver account id
-      * @receiverPublicKey specifies the receiver public key
-      * @receiverPositionId specifies the receiver position id
-      * @clientId specifies the clientId for the address
-      * @signature starkware specific signature for the transfer
-      * }
-      * @param positionId specifies the associated position for the transfer
-      */
+   * @description post a new transfer
+   *
+   * @param {
+   * @amount specifies the size of the transfer
+   * @receiverAccountId specifies the receiver account id
+   * @receiverPublicKey specifies the receiver public key
+   * @receiverPositionId specifies the receiver position id
+   * @clientId specifies the clientId for the address
+   * @signature starkware specific signature for the transfer
+   * }
+   * @param positionId specifies the associated position for the transfer
+   */
   // async createTransfer(
   //   params: PartialBy<TransferParams, 'clientId' | 'signature'>,
   //   positionId: string,
@@ -860,14 +908,11 @@ export default class Private {
    * }
    */
   async getFundingPayments(
-    genericParams: GenericParams = {},
+    genericParams: GenericParams = {}
   ): Promise<{ data: FundingResponseObject[] }> {
-    return this.post(
-      'funding-history',
-      {
-        ...genericParams,
-      },
-    );
+    return this.post('funding-history', {
+      ...genericParams,
+    });
   }
 
   /**
@@ -880,18 +925,15 @@ export default class Private {
    */
   getHistoricalPnl(
     params: {
-      createdBeforeOrAt?: ISO8601,
-      createdOnOrAfter?: ISO8601,
+      createdBeforeOrAt?: ISO8601;
+      createdOnOrAfter?: ISO8601;
     },
-    genericParams: GenericParams = {},
+    genericParams: GenericParams = {}
   ): Promise<{ historicalPnl: HistoricalPnlResponseObject[] }> {
-    return this._get(
-      'historical-pnl',
-      {
-        ...params,
-        ...genericParams,
-      },
-    );
+    return this._get('historical-pnl', {
+      ...params,
+      ...genericParams,
+    });
   }
 
   /**
@@ -903,17 +945,14 @@ export default class Private {
    */
   getTradingRewards(
     params: {
-      epoch?: number,
+      epoch?: number;
     },
-    genericParams: GenericParams = {},
+    genericParams: GenericParams = {}
   ): Promise<TradingRewardsResponseObject> {
-    return this._get(
-      'rewards/weight',
-      {
-        ...params,
-        ...genericParams,
-      },
-    );
+    return this._get('rewards/weight', {
+      ...params,
+      ...genericParams,
+    });
   }
 
   /**
@@ -925,17 +964,14 @@ export default class Private {
    */
   getLiquidityProviderRewards(
     params: {
-      epoch?: number,
+      epoch?: number;
     },
-    genericParams: GenericParams = {},
+    genericParams: GenericParams = {}
   ): Promise<LiquidityProviderRewardsResponseObject> {
-    return this._get(
-      'rewards/liquidity',
-      {
-        ...params,
-        ...genericParams,
-      },
-    );
+    return this._get('rewards/liquidity', {
+      ...params,
+      ...genericParams,
+    });
   }
 
   /**
@@ -943,14 +979,11 @@ export default class Private {
    *
    */
   getRetroactiveMiningRewards(
-    genericParams: GenericParams = {},
+    genericParams: GenericParams = {}
   ): Promise<RetroactiveMiningRewardsResponseObject> {
-    return this._get(
-      'rewards/retroactive-mining',
-      {
-        ...genericParams,
-      },
-    );
+    return this._get('rewards/retroactive-mining', {
+      ...genericParams,
+    });
   }
 
   /**
@@ -958,7 +991,7 @@ export default class Private {
    *
    */
   async getApiKeys(
-    genericParams: GenericParams = {},
+    genericParams: GenericParams = {}
   ): Promise<{ apiKeys: { key: string }[] }> {
     return this._get('api-keys', { ...genericParams });
   }
@@ -967,10 +1000,7 @@ export default class Private {
    * @description send verification email to email specified by User
    */
   async sendVerificationEmail(): Promise<{}> {
-    return this.put(
-      'emails/send-verification-email',
-      {},
-    );
+    return this.put('emails/send-verification-email', {});
   }
 
   /**
@@ -983,24 +1013,18 @@ export default class Private {
       throw new Error('Network is not Ropsten');
     }
 
-    return this.post(
-      'testnet/tokens',
-      {},
-    );
+    return this.post('testnet/tokens', {});
   }
 
   /**
    * @description get ethereum address restrictions on the flash1 protocol.
    */
   async getRestrictions(
-    genericParams: GenericParams = {},
+    genericParams: GenericParams = {}
   ): Promise<RestrictionResponseObject> {
-    return this._get(
-      'restrictions',
-      {
-        ...genericParams,
-      },
-    );
+    return this._get('restrictions', {
+      ...genericParams,
+    });
   }
 
   /**
@@ -1011,46 +1035,101 @@ export default class Private {
       residenceCountry,
       tradingCountry,
     }: {
-      residenceCountry: ISO31661ALPHA2,
-      tradingCountry: ISO31661ALPHA2,
+      residenceCountry: ISO31661ALPHA2;
+      tradingCountry: ISO31661ALPHA2;
     },
-    genericParams: GenericParams = {},
+    genericParams: GenericParams = {}
   ): Promise<UserComplianceResponseObject> {
-    return this.post(
-      'restrictions/compliance',
-      {
-        residenceCountry,
-        tradingCountry,
-        ...genericParams,
-      },
-    );
+    return this.post('restrictions/compliance', {
+      residenceCountry,
+      tradingCountry,
+      ...genericParams,
+    });
   }
 
   /**
    * @description get private profile information
    */
   async getProfilePrivate(
-    genericParams: GenericParams = {},
+    genericParams: GenericParams = {}
   ): Promise<ProfilePrivateResponseObject> {
-    return this._get(
-      'profile/private',
-      {
-        ...genericParams,
-      },
-    );
+    return this._get('profile/private', {
+      ...genericParams,
+    });
   }
 
-  private getClosingOrderPrice(side: StarkwareOrderSide, price: string): string {
-    const margin = 0.1;
-    return side === StarkwareOrderSide.BUY ? `${parseInt(price) * (1 - margin)}` : `${parseInt(price) * (1 + margin)}`
+  private getClosingOrderPrice(
+    side: StarkwareOrderSide,
+    price: string
+  ): string {
+    const margin = 0.2;
+    return side === StarkwareOrderSide.BUY
+      ? `${parseFloat(price) * (1 - margin)}`
+      : `${parseFloat(price) * (1 + margin)}`;
+  }
+
+  private getClosingOrderCollateralAmount(
+    openingOrderSide: StarkwareOrderSide,
+    quantumsAmountCollateral: string
+  ): string {
+    const original = BigInt(quantumsAmountCollateral);
+    const adjustment = (original / BigInt(10)) * BigInt(2); // 20% adjustment with truncate (calculation order cannot be changed)
+    return openingOrderSide === StarkwareOrderSide.BUY
+      ? `${original - adjustment}`
+      : `${original + adjustment}`;
   }
 
   private getFlashloanPriceWithInterest(flashloan: number): string {
-    return `${flashloan * 1.000001}`
+    const r = Math.pow(10, ASSET_RESOLUTION.USDC);
+    return `${Math.round(flashloan * 1.000001 * r) / r}`;
   }
 
   private getInsurancePremium(flashloan: number): string {
-    return `${flashloan * 0.0003}`
+    const r = Math.pow(10, ASSET_RESOLUTION.USDC);
+    return `${Math.round(flashloan * 0.0003 * r) / r}`;
+  }
+
+  private getHumanReadableQuantityForFlashLoan(
+    asset: SyntheticAsset,
+    flashloan: number,
+    leverage: number,
+    price: string
+  ): string {
+    const r = Math.pow(10, ASSET_RESOLUTION[asset]);
+    const totalPositionSize = flashloan * leverage;
+    const roundedHumanReadableQuantity =
+      Math.round((totalPositionSize / parseFloat(price)) * r) / r;
+    return this.getFlash1QuantizedQuantity(
+      asset,
+      roundedHumanReadableQuantity.toFixed(ASSET_RESOLUTION[asset])
+    );
+  }
+
+  private getHumanReadableQuantity(
+    asset: SyntheticAsset,
+    userCollateral: number,
+    leverage: number,
+    price: string
+  ): string {
+    const r = Math.pow(10, ASSET_RESOLUTION[asset]);
+    const totalPositionSize = userCollateral * leverage;
+    const roundedHumanReadableQuantity =
+      Math.round((totalPositionSize / parseFloat(price)) * r) / r;
+    return this.getFlash1QuantizedQuantity(
+      asset,
+      roundedHumanReadableQuantity.toFixed(ASSET_RESOLUTION[asset])
+    );
+  }
+
+  private getFlash1QuantizedQuantity(
+    asset: SyntheticAsset,
+    quantity: string
+  ): string {
+    const contractSize =
+      FLASH1_CONTRACT_SIZE[REVERSE_SYNTHETIC_ASSET_MAP[asset]];
+    const contractResolution = -Math.log10(contractSize);
+    const internallyQuantized = Math.floor(parseFloat(quantity) / contractSize);
+    return (internallyQuantized * contractSize).toFixed(contractResolution);
   }
 
   // ============ Signing ============
@@ -1061,20 +1140,19 @@ export default class Private {
     isoTimestamp,
     data,
   }: {
-    requestPath: string,
-    method: RequestMethod,
-    isoTimestamp: ISO8601,
-    data?: {},
+    requestPath: string;
+    method: RequestMethod;
+    isoTimestamp: ISO8601;
+    data?: {};
   }): string {
-    const messageString: string = (
+    const messageString: string =
       isoTimestamp +
       METHOD_ENUM_MAP[method] +
       requestPath +
-      (isEmpty(data) ? '' : JSON.stringify(data))
-    );
+      (isEmpty(data) ? '' : JSON.stringify(data));
     const hmac = crypto.algo.HMAC.create(
       crypto.algo.SHA256,
-      crypto.enc.Base64url.parse(this.apiKeyCredentials.secret),
+      crypto.enc.Base64url.parse(this.apiKeyCredentials.secret)
     );
     const base64ParsedMsg = Buffer.from(messageString).toString('base64');
     return hmac.update(base64ParsedMsg).finalize().toString(crypto.enc.Base64);

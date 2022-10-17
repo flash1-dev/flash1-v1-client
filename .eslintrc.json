@@ -1,0 +1,42 @@
+{
+  "env": {
+    "browser": true,
+    "es2021": true
+  },
+  "extends": [
+    "eslint:recommended",
+    "plugin:react/recommended",
+    "plugin:@typescript-eslint/recommended",
+    "prettier"
+  ],
+  "parser": "@typescript-eslint/parser",
+  "parserOptions": {
+    "ecmaFeatures": {
+      "jsx": true
+    },
+    "ecmaVersion": "latest",
+    "sourceType": "module"
+  },
+  "plugins": ["react", "@typescript-eslint", "prettier"],
+  "rules": {
+    //here we can change any rule "off/error/warn"
+    "prettier/prettier": [
+      "error",
+      {
+        "semi": true,
+        "tabWidth": 2,
+        "singleQuote": true,
+        "useTabs": false
+      }
+    ], // or warn
+    // this is needed for prettier to work
+
+    //example rules
+    "@typescript-eslint/no-unused-vars": ["off"],
+    "@typescript-eslint/ban-types": ["off"],
+
+    "no-unused-vars": "off" // default in airbnb is error
+    // "@typescript-eslint/no-unused-vars": ["off"]
+    //you can disable add or remove rules based on your coding taste
+  }
+}
