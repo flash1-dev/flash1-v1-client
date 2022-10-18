@@ -148,10 +148,6 @@ export class Flash1Client {
             ? this.starkPrivateKey
             : this.starkPrivateKey.privateKey;
         const starkKeypair = asSimpleKeyPair(asEcKeyPair(starkPrivateKey));
-        console.log(
-          'CONFIGGGGGGGG',
-          this.networkId == 1 ? Config.MAINNET : Config.GOERLI
-        );
         this._eth = new Flash1Eth(
           this.networkId == 1 ? Config.MAINNET : Config.GOERLI,
           {
