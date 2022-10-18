@@ -27,39 +27,28 @@ import { RequestMethod, axiosRequest } from '../lib/axios';
 import { getAccountId } from '../lib/db';
 import {
   AccountAction,
-  AccountLeaderboardPnlPeriod,
-  AccountLeaderboardPnlResponseObject,
   AccountResponseObject,
   ApiKeyCredentials,
   ApiOrder,
   ApiWithdrawal,
   Data,
-  FillResponseObject,
   FundingResponseObject,
   GenericParams,
   HistoricalPnlResponseObject,
   ISO8601,
   ISO31661ALPHA2,
   LiquidityProviderRewardsResponseObject,
-  ListedMarket,
-  OrderResponseObject,
-  OrderSide,
-  OrderStatus,
-  OrderType,
   PartialBy,
   PositionResponseObject,
-  PositionStatus,
   RetroactiveMiningRewardsResponseObject,
   TradingRewardsResponseObject,
   TransferResponseObject,
   UserResponseObject,
-  ActiveOrderResponseObject,
   RestrictionResponseObject,
   UserComplianceResponseObject,
   ProfilePrivateResponseObject,
-  HistoricalLeaderboardPnlsResponseObject,
-  Provider,
   ApiOrderWithFlashloan,
+  OrderResponseObject,
 } from '../types';
 import Clock from './clock';
 
@@ -441,7 +430,7 @@ export default class Private {
    */
   async submitOrder(
     params: PartialBy<ApiOrder, 'signature' | 'clientId'>
-  ): Promise<{ order: OrderResponseObject }> {
+  ): Promise<{ order: OrderResponseObject[] }> {
     const clientId = generateRandomClientId();
     let signature: string | undefined = params.signature;
     if (!signature) {
@@ -450,7 +439,7 @@ export default class Private {
           'Order is not signed and client was not initialized with starkPrivateKey'
         );
       }
-      if (typeof params.quantity === 'undefined') {
+      if (!params.quantity) {
         params.quantity = this.getHumanReadableQuantity(
           SYNTHETIC_ASSET_MAP[params.instrument],
           params.userCollateral,

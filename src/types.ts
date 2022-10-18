@@ -291,24 +291,27 @@ export interface MarketStatisticResponseObject {
 }
 
 export interface OrderResponseObject {
-  id: string;
-  clientId?: string;
-  accountId: string;
-  market: ListedMarket;
+  orderID: string;
+  userID: number;
+  Instrument: string;
   side: OrderSide;
-  price: string;
-  triggerPrice?: string | null;
-  trailingPercent?: string | null;
-  size: string;
-  remainingSize: string;
-  type: OrderType;
-  createdAt: ISO8601;
-  unfillableAt?: ISO8601 | null;
-  expiresAt?: ISO8601;
-  status: OrderStatus;
-  timeInForce: TimeInForce;
+  price: number;
+  quantity: number;
+  receivedTime: string;
+  processedTime: string;
+  orderType: string;
+  timeInForce: string;
   postOnly: boolean;
-  cancelReason?: string | null;
+  hidden?: false;
+  initialMargin: number;
+  selfTrade: boolean;
+  clearing: boolean;
+  timeLimitedClearing: boolean;
+  offset: boolean;
+  offsetAmount: number;
+  stopPrice: number;
+  marginCall: boolean;
+  duration: number;
 }
 
 export interface ActiveOrderResponseObject {
