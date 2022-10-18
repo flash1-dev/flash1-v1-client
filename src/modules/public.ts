@@ -80,7 +80,7 @@ export default class Public {
    *
    * @param market if only one market should be returned
    */
-  getMarkets(): Promise<{ markets: MarketsResponseObject }> {
+  getMarkets(): Promise<MarketsResponseObject> {
     const uri = 'full-listing';
     return this.get(uri, {});
   }
