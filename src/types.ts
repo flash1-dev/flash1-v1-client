@@ -274,9 +274,7 @@ export interface MarketResponseObject {
   syntheticAssetId: string;
 }
 
-export interface MarketsResponseObject {
-  [market: string]: MarketResponseObject;
-}
+export type MarketsResponseObject = string[];
 
 export interface MarketStatisticResponseObject {
   market: ListedMarket;

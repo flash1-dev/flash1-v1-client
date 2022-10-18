@@ -76,15 +76,13 @@ export default class Public {
   }
 
   /**
-   * @description get market information for either all markets or a specific market
+   * @description get a list of available markets
    *
    * @param market if only one market should be returned
    */
-  getMarkets(
-    market?: ListedMarket
-  ): Promise<{ markets: MarketsResponseObject }> {
-    const uri = 'markets';
-    return this.get(uri, { market });
+  getMarkets(): Promise<{ markets: MarketsResponseObject }> {
+    const uri = 'full-listing';
+    return this.get(uri, {});
   }
 
   /**
