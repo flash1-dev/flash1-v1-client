@@ -506,9 +506,6 @@ export default class Private {
     >
   ): Promise<{ order: OrderResponseObject }> {
     const clientId = generateRandomClientId();
-    const clientId2 = parseInt(clientId, 10) + 1;
-    const clientId3 = clientId2 + 1;
-    const clientId4 = clientId3 + 1;
     let signature: string | undefined = params.signature;
     let flashloanSignature: string | undefined = params.flashloanSignature;
     let insuranceSignature: string | undefined = params.insuranceSignature;
@@ -554,7 +551,7 @@ export default class Private {
         receiverPositionId: getDefaultVaultId(this.flashloanAccount),
         receiverPublicKey: this.flashloanAccount,
         humanAmount: this.getFlashloanPriceWithInterest(params.flashloan),
-        clientId: clientId2.toString(),
+        clientId: this.getFlashLoanReturnTransferSuffix(clientId),
         expirationIsoTimestamp: params.expiration,
       };
       const flashLoanTransferOrder = SignableTransfer.fromTransfer(
@@ -567,7 +564,7 @@ export default class Private {
         receiverPositionId: getDefaultVaultId(this.insuranceAccount),
         receiverPublicKey: this.insuranceAccount,
         humanAmount: this.getInsurancePremium(params.flashloan),
-        clientId: clientId3.toString(),
+        clientId: this.getInsurancePremiumTransferSuffix(clientId),
         expirationIsoTimestamp: params.expiration,
       };
       const insuranceTransferOrder = SignableTransfer.fromTransfer(
@@ -586,7 +583,7 @@ export default class Private {
             : StarkwareOrderSide.BUY,
         expirationIsoTimestamp: params.expiration,
         positionId: this.defaultPositionId,
-        clientId: clientId4.toString(),
+        clientId: this.getClosingOrderSuffix(clientId),
       };
       const closingOrder = SignableOrder.fromOrder(
         closingOrderToSign,
@@ -1057,6 +1054,10 @@ export default class Private {
       : `${parseFloat(price) * (1 + margin)}`;
   }
 
+  private getClosingOrderSuffix(clientId: string): string {
+    return clientId + '-CLOSING';
+  }
+
   private getClosingOrderCollateralAmount(
     openingOrderSide: StarkwareOrderSide,
     quantumsAmountCollateral: string
@@ -1073,9 +1074,17 @@ export default class Private {
     return `${Math.round(flashloan * 1.000001 * r) / r}`;
   }
 
+  private getFlashLoanReturnTransferSuffix(clientId: string): string {
+    return clientId + '-LOAN-RETURN';
+  }
+
   private getInsurancePremium(flashloan: number): string {
     const r = Math.pow(10, ASSET_RESOLUTION.USDC);
     return `${Math.round(flashloan * 0.0003 * r) / r}`;
+  }
+
+  private getInsurancePremiumTransferSuffix(clientId: string): string {
+    return clientId + '-INSURANCE-FEE';
   }
 
   private getHumanReadableQuantityForFlashLoan(
