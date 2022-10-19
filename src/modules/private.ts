@@ -1054,9 +1054,7 @@ export default class Private {
       : `${parseFloat(price) * (1 + margin)}`;
   }
 
-  private getClosingOrderSuffix(
-    clientId: string
-  ): string {
+  private getClosingOrderSuffix(clientId: string): string {
     return clientId + '-CLOSING';
   }
 
