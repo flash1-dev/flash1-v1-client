@@ -430,7 +430,7 @@ export default class Private {
    */
   async submitOrder(
     params: PartialBy<ApiOrder, 'signature' | 'clientId'>
-  ): Promise<{ order: OrderResponseObject[] }> {
+  ): Promise<OrderResponseObject[]> {
     const clientId = generateRandomClientId();
     let signature: string | undefined = params.signature;
     if (!signature) {
@@ -504,7 +504,7 @@ export default class Private {
       | 'closingOrderSignature'
       | 'clientId'
     >
-  ): Promise<{ order: OrderResponseObject }> {
+  ): Promise<OrderResponseObject> {
     const clientId = generateRandomClientId();
     let signature: string | undefined = params.signature;
     let flashloanSignature: string | undefined = params.flashloanSignature;
