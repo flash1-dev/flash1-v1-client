@@ -1,6 +1,13 @@
 import { ethers } from 'ethers';
 
-import { Address, SignatureTypes } from '../types';
+import {
+  Address,
+  SignatureTypes,
+  KeyPair,
+  KeyPairWithYCoordinate,
+} from '../types';
+import { asEcKeyPair, asSimpleKeyPair } from '@flash1-exchange/starkex-lib';
+import { addHexPrefix } from '../helpers/request-helpers';
 
 /**
  * Ethereum signed message prefix without message length.
@@ -129,6 +136,15 @@ export function fixRawSignature(signature: string): string {
     default:
       throw new Error(`Invalid v value: ${v}`);
   }
+}
+
+export function generateStarkKeyPairsFromPrivate(
+  privateOrKeyPair: string | KeyPair
+): KeyPairWithYCoordinate {
+  const simpleKeyPair = asSimpleKeyPair(asEcKeyPair(privateOrKeyPair));
+  simpleKeyPair.publicKey = addHexPrefix(simpleKeyPair.publicKey);
+  simpleKeyPair.privateKey = addHexPrefix(simpleKeyPair.privateKey);
+  return simpleKeyPair;
 }
 
 // ============ Byte Helpers ============

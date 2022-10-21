@@ -84,18 +84,18 @@ export default class Private {
     host: string;
     apiKeyCredentials: ApiKeyCredentials;
     networkId: number;
-    starkPrivateKey?: string | KeyPair;
+    starkPrivateKey?: KeyPair;
     clock: Clock;
     flashloanAccount?: string;
     insuranceAccount?: string;
   }) {
     this.host = host;
     this.apiKeyCredentials = apiKeyCredentials;
-    this.networkId = networkId;
-    if (starkPrivateKey) {
-      this.starkKeyPair = asSimpleKeyPair(asEcKeyPair(starkPrivateKey));
+    this.starkKeyPair = starkPrivateKey;
+    if (this.starkKeyPair) {
       this.defaultPositionId = getDefaultVaultId(this.starkKeyPair.publicKey);
     }
+    this.networkId = networkId;
     this.clock = clock;
     this.flashloanAccount = flashloanAccount;
     this.insuranceAccount = insuranceAccount;

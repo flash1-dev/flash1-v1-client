@@ -21,12 +21,18 @@ describe('Verify signature is as expected', () => {
 
     const wallet = ethers.Wallet.createRandom();
 
-    const client = new Flash1Client('https://example.com', { signer: wallet, apiKeyCredentials });
+    const client = new Flash1Client('https://example.com', {
+      signer: wallet,
+      apiKeyCredentials,
+    });
     await client.private.getApiKeys();
-    expect(client.private.sign({
-      requestPath: '/v1/api-keys?ethereumAddress=0xE5714924C8C5c732F92A439075C8211eB0611aaC',
-      method: RequestMethod.GET,
-      isoTimestamp: '2021-02-01T19:38:54.508Z',
-    })).toEqual('3H/uHAJiEdvIufXGwq2erXlTL82RjYzx68PxmBbT8lk=');
+    expect(
+      client.private.sign({
+        requestPath:
+          '/v1/api-keys?ethereumAddress=0xE5714924C8C5c732F92A439075C8211eB0611aaC',
+        method: RequestMethod.GET,
+        isoTimestamp: '2021-02-01T19:38:54.508Z',
+      })
+    ).toEqual('3H/uHAJiEdvIufXGwq2erXlTL82RjYzx68PxmBbT8lk=');
   });
 });
