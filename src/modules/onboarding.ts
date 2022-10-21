@@ -4,7 +4,10 @@ import {
 } from '@flash1-exchange/starkex-lib';
 
 import { SignOnboardingAction } from '../eth-signing';
-import { stripHexPrefix } from '../eth-signing/helpers';
+import {
+  stripHexPrefix,
+  generateStarkKeyPairsFromPrivate,
+} from '../eth-signing/helpers';
 import { keccak256Buffer } from '../helpers/request-helpers';
 import { RequestMethod, axiosRequest } from '../lib/axios';
 import {
@@ -147,7 +150,9 @@ export default class Onboarding {
       signingMethod,
       message
     );
-    return keyPairFromData(Buffer.from(stripHexPrefix(signature), 'hex'));
+    return generateStarkKeyPairsFromPrivate(
+      keyPairFromData(Buffer.from(stripHexPrefix(signature), 'hex'))
+    );
   }
 
   /**

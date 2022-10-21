@@ -1,12 +1,11 @@
-import { asEcKeyPair, asSimpleKeyPair } from '@flash1-exchange/starkex-lib';
 import { Flash1 as Flash1Eth, Config } from '@flash1-exchange/starkex-eth';
 import Clock from './modules/clock';
 import EthPrivate from './modules/eth-private';
 import Onboarding from './modules/onboarding';
 import Private from './modules/private';
 import Public from './modules/public';
+import { generateStarkKeyPairsFromPrivate } from './eth-signing/helpers';
 import { ApiKeyCredentials, Signer, KeyPair } from './types';
-import { addHexPrefix } from './helpers/request-helpers';
 
 export interface ClientOptions {
   apiTimeout?: number;
@@ -29,7 +28,7 @@ export class Flash1Client {
   readonly flashloanAccount?: string;
   readonly insuranceAccount?: string;
   apiKeyCredentials?: ApiKeyCredentials;
-  starkPrivateKey?: string | KeyPair;
+  starkPrivateKey?: KeyPair;
 
   // Modules.
   private readonly _public: Public;
@@ -46,7 +45,9 @@ export class Flash1Client {
     this.apiTimeout = options.apiTimeout;
     this.networkId =
       typeof options.networkId === 'number' ? options.networkId : 1;
-    this.starkPrivateKey = options.starkPrivateKey;
+    if (options.starkPrivateKey) {
+      this.setStarkPrivateKey(options.starkPrivateKey);
+    }
     this.apiKeyCredentials = options.apiKeyCredentials;
     this.signer = options.signer;
     this.ethAddress = options.ethAddress;
@@ -143,17 +144,12 @@ export class Flash1Client {
   get eth() {
     if (!this._eth) {
       if (this.signer && this.starkPrivateKey && this.ethAddress) {
-        const starkPrivateKey =
-          typeof this.starkPrivateKey == 'string'
-            ? this.starkPrivateKey
-            : this.starkPrivateKey.privateKey;
-        const starkKeypair = asSimpleKeyPair(asEcKeyPair(starkPrivateKey));
         this._eth = new Flash1Eth(
           this.networkId == 1 ? Config.MAINNET : Config.GOERLI,
           {
             starkex: {
-              publicKey: addHexPrefix(starkKeypair.publicKey),
-              privateKey: addHexPrefix(starkPrivateKey.toString()),
+              publicKey: this.starkPrivateKey.publicKey,
+              privateKey: this.starkPrivateKey.privateKey,
             },
             ethereum: {
               publicKey: this.ethAddress,
@@ -171,7 +167,7 @@ export class Flash1Client {
   }
 
   setStarkPrivateKey(privateOrKeyPair: string | KeyPair) {
-    this.starkPrivateKey = privateOrKeyPair;
+    this.starkPrivateKey = generateStarkKeyPairsFromPrivate(privateOrKeyPair);
   }
 }
 
