@@ -1394,10 +1394,10 @@
     "@ethersproject/properties" "^5.7.0"
     "@ethersproject/strings" "^5.7.0"
 
-"@flash1-exchange/starkex-eth@^0.2.1":
-  version "0.2.1"
-  resolved "https://registry.yarnpkg.com/@flash1-exchange/starkex-eth/-/starkex-eth-0.2.1.tgz#734ea6b4d0060428dcc497ea646616e1374af825"
-  integrity sha512-htEfyrFrEEEPVhbqDybjxbJX6xpyTkFMl5j68+rovULoylU1O5Sa3mDlo3Z+DAHA9bQwEpJkWHtQv6Gw8x339w==
+"@flash1-exchange/starkex-eth@^0.2.2":
+  version "0.2.2"
+  resolved "https://registry.yarnpkg.com/@flash1-exchange/starkex-eth/-/starkex-eth-0.2.2.tgz#00e3658ac95edee6d8072f512b4e5f6bb137f6f6"
+  integrity sha512-Fi3TbbxTCBKV+ienGrgjC+0ubM3EsEqTHOq3CVkNW5KS4NmrwzFCbS8kGjYVh7nN7IN2tQOQpcvMSDXzgEqehA==
   dependencies:
     "@ethersproject/abi" "^5.0.0"
     "@ethersproject/bytes" "^5.0.0"
@@ -1410,10 +1410,10 @@
     ethers "^5.6.9"
     hash.js "^1.1.7"
 
-"@flash1-exchange/starkex-lib@^1.2.4":
-  version "1.2.4"
-  resolved "https://registry.yarnpkg.com/@flash1-exchange/starkex-lib/-/starkex-lib-1.2.4.tgz#6448391e7bd670b6811b75e6bfcc8199a742bb28"
-  integrity sha512-dAFRXfnatuadVrO3f6Fw9vn4TJxszao6H4x0zC+H6HvdrYD0cIa4Q3UjjzRJEiOYI+q5/FL+/XsGocCh23hQGQ==
+"@flash1-exchange/starkex-lib@^1.2.5":
+  version "1.2.5"
+  resolved "https://registry.yarnpkg.com/@flash1-exchange/starkex-lib/-/starkex-lib-1.2.5.tgz#a1ffa6224bb228dd19bf2536a3d3995a5b5de1a4"
+  integrity sha512-cCvsPKAWZbNRV+qzEkV+WbjAbpc+uwhktdzDYVypCQbr+Vfvz7Q7lN2ojd9ha6XdhIlL8WlUCXRwyMcOlXcXng==
   dependencies:
     big.js "6.0.3"
     bigint-buffer "^1.1.5"

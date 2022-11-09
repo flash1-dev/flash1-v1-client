@@ -742,8 +742,7 @@ export default class Private {
    * @param positionId specifies the associated position for the transfer
    */
   async createWithdrawal(
-    params: PartialBy<ApiWithdrawal, 'clientId' | 'signature'>,
-    positionId: string
+    params: PartialBy<ApiWithdrawal, 'clientId' | 'signature'>
   ): Promise<{ withdrawal: TransferResponseObject }> {
     const clientId = params.clientId || generateRandomClientId();
 
@@ -758,7 +757,7 @@ export default class Private {
         humanAmount: params.amount,
         expirationIsoTimestamp: params.expiration,
         clientId,
-        positionId,
+        positionId: this.defaultPositionId,
       };
       const starkWithdrawal = SignableWithdrawal.fromWithdrawal(
         withdrawalToSign,

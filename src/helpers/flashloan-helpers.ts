@@ -7,7 +7,7 @@ import {
 } from '@flash1-exchange/starkex-lib';
 
 export const getFlashloanPriceWithInterest = (flashloan: number): string => {
-  const r = Math.pow(10, ASSET_RESOLUTION.USDC);
+  const r = Math.pow(10, ASSET_RESOLUTION.USDT);
   return `${Math.round(flashloan * 1.000001 * r) / r}`;
 };
 
@@ -75,7 +75,7 @@ export const getFlash1QuantizedQuantity = (
 };
 
 export const getInsurancePremium = (flashloan: number): string => {
-  const r = Math.pow(10, ASSET_RESOLUTION.USDC);
+  const r = Math.pow(10, ASSET_RESOLUTION.USDT);
   return `${Math.round(flashloan * 0.0003 * r) / r}`;
 };
 
