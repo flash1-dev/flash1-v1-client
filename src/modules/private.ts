@@ -5,15 +5,9 @@ import {
   SignableOrder,
   SignableWithdrawal,
   SignableTransfer,
-  asEcKeyPair,
-  asSimpleKeyPair,
   TransferParams,
   StarkwareOrderSide,
-  ASSET_RESOLUTION,
-  FLASH1_CONTRACT_SIZE,
   SYNTHETIC_ASSET_MAP,
-  REVERSE_SYNTHETIC_ASSET_MAP,
-  SyntheticAsset,
 } from '@flash1-exchange/starkex-lib';
 import crypto from 'crypto-js';
 import isEmpty from 'lodash/isEmpty';
@@ -51,6 +45,7 @@ import {
   OrderResponseObject,
 } from '../types';
 import Clock from './clock';
+import * as flashloanHelpers from '../helpers/flashloan-helpers';
 
 // TODO: Figure out if we can get rid of this.
 const METHOD_ENUM_MAP: Record<RequestMethod, ApiMethod> = {
@@ -440,14 +435,14 @@ export default class Private {
         );
       }
       if (!params.quantity) {
-        params.quantity = this.getHumanReadableQuantity(
+        params.quantity = flashloanHelpers.getHumanReadableQuantity(
           SYNTHETIC_ASSET_MAP[params.instrument],
           params.userCollateral,
           params.leverage,
           params.price
         );
       } else {
-        params.quantity = this.getFlash1QuantizedQuantity(
+        params.quantity = flashloanHelpers.getFlash1QuantizedQuantity(
           SYNTHETIC_ASSET_MAP[params.instrument],
           params.quantity
         );
@@ -519,14 +514,14 @@ export default class Private {
       }
 
       if (!params.quantity) {
-        params.quantity = this.getHumanReadableQuantityForFlashLoan(
+        params.quantity = flashloanHelpers.getHumanReadableQuantityForFlashLoan(
           SYNTHETIC_ASSET_MAP[params.instrument],
           params.flashloan,
           params.leverage,
           params.price
         );
       } else {
-        params.quantity = this.getFlash1QuantizedQuantity(
+        params.quantity = flashloanHelpers.getFlash1QuantizedQuantity(
           SYNTHETIC_ASSET_MAP[params.instrument],
           params.quantity
         );
@@ -550,8 +545,10 @@ export default class Private {
         senderPositionId: this.defaultPositionId,
         receiverPositionId: getDefaultVaultId(this.flashloanAccount),
         receiverPublicKey: this.flashloanAccount,
-        humanAmount: this.getFlashloanPriceWithInterest(params.flashloan),
-        clientId: this.getFlashLoanReturnTransferSuffix(clientId),
+        humanAmount: flashloanHelpers.getFlashloanPriceWithInterest(
+          params.flashloan
+        ),
+        clientId: flashloanHelpers.getFlashLoanReturnTransferSuffix(clientId),
         expirationIsoTimestamp: params.expiration,
       };
       const flashLoanTransferOrder = SignableTransfer.fromTransfer(
@@ -563,8 +560,8 @@ export default class Private {
         senderPositionId: this.defaultPositionId,
         receiverPositionId: getDefaultVaultId(this.insuranceAccount),
         receiverPublicKey: this.insuranceAccount,
-        humanAmount: this.getInsurancePremium(params.flashloan),
-        clientId: this.getInsurancePremiumTransferSuffix(clientId),
+        humanAmount: flashloanHelpers.getInsurancePremium(params.flashloan),
+        clientId: flashloanHelpers.getInsurancePremiumTransferSuffix(clientId),
         expirationIsoTimestamp: params.expiration,
       };
       const insuranceTransferOrder = SignableTransfer.fromTransfer(
@@ -574,7 +571,10 @@ export default class Private {
       insuranceTransferOrder.toStarkware().expirationEpochHours = closingStamp;
       const closingOrderToSign: OrderWithClientId = {
         humanSize: params.quantity,
-        humanPrice: this.getClosingOrderPrice(params.side, params.price),
+        humanPrice: flashloanHelpers.getClosingOrderPrice(
+          params.side,
+          params.price
+        ),
         limitFee: params.limitFee,
         market: params.instrument,
         side:
@@ -583,14 +583,14 @@ export default class Private {
             : StarkwareOrderSide.BUY,
         expirationIsoTimestamp: params.expiration,
         positionId: this.defaultPositionId,
-        clientId: this.getClosingOrderSuffix(clientId),
+        clientId: flashloanHelpers.getClosingOrderSuffix(clientId),
       };
       const closingOrder = SignableOrder.fromOrder(
         closingOrderToSign,
         this.networkId
       );
       const cc = starkOrder.toStarkware().quantumsAmountCollateral;
-      const closingAmount = this.getClosingOrderCollateralAmount(
+      const closingAmount = flashloanHelpers.getClosingOrderCollateralAmount(
         params.side,
         cc
       );
@@ -610,6 +610,11 @@ export default class Private {
         insuranceTransferOrder.sign(this.starkKeyPair),
         closingOrder.sign(this.starkKeyPair),
       ]);
+      console.log('starkOrder', starkOrder);
+      console.log('flashLoanTransferOrder', flashLoanTransferOrder);
+      console.log('insuranceTransferOrder', insuranceTransferOrder);
+      console.log('closingOrder', closingOrder);
+      console.log('params', params);
     }
 
     const order: ApiOrderWithFlashloan = {
@@ -737,8 +742,7 @@ export default class Private {
    * @param positionId specifies the associated position for the transfer
    */
   async createWithdrawal(
-    params: PartialBy<ApiWithdrawal, 'clientId' | 'signature'>,
-    positionId: string
+    params: PartialBy<ApiWithdrawal, 'clientId' | 'signature'>
   ): Promise<{ withdrawal: TransferResponseObject }> {
     const clientId = params.clientId || generateRandomClientId();
 
@@ -753,7 +757,7 @@ export default class Private {
         humanAmount: params.amount,
         expirationIsoTimestamp: params.expiration,
         clientId,
-        positionId,
+        positionId: this.defaultPositionId,
       };
       const starkWithdrawal = SignableWithdrawal.fromWithdrawal(
         withdrawalToSign,
@@ -1042,92 +1046,6 @@ export default class Private {
     return this._get('profile/private', {
       ...genericParams,
     });
-  }
-
-  private getClosingOrderPrice(
-    side: StarkwareOrderSide,
-    price: string
-  ): string {
-    const margin = 0.2;
-    return side === StarkwareOrderSide.BUY
-      ? `${parseFloat(price) * (1 - margin)}`
-      : `${parseFloat(price) * (1 + margin)}`;
-  }
-
-  private getClosingOrderSuffix(clientId: string): string {
-    return clientId + '-CLOSING';
-  }
-
-  private getClosingOrderCollateralAmount(
-    openingOrderSide: StarkwareOrderSide,
-    quantumsAmountCollateral: string
-  ): string {
-    const original = BigInt(quantumsAmountCollateral);
-    const adjustment = (original / BigInt(10)) * BigInt(2); // 20% adjustment with truncate (calculation order cannot be changed)
-    return openingOrderSide === StarkwareOrderSide.BUY
-      ? `${original - adjustment}`
-      : `${original + adjustment}`;
-  }
-
-  private getFlashloanPriceWithInterest(flashloan: number): string {
-    const r = Math.pow(10, ASSET_RESOLUTION.USDC);
-    return `${Math.round(flashloan * 1.000001 * r) / r}`;
-  }
-
-  private getFlashLoanReturnTransferSuffix(clientId: string): string {
-    return clientId + '-LOAN-RETURN';
-  }
-
-  private getInsurancePremium(flashloan: number): string {
-    const r = Math.pow(10, ASSET_RESOLUTION.USDC);
-    return `${Math.round(flashloan * 0.0003 * r) / r}`;
-  }
-
-  private getInsurancePremiumTransferSuffix(clientId: string): string {
-    return clientId + '-INSURANCE-FEE';
-  }
-
-  private getHumanReadableQuantityForFlashLoan(
-    asset: SyntheticAsset,
-    flashloan: number,
-    leverage: number,
-    price: string
-  ): string {
-    const r = Math.pow(10, ASSET_RESOLUTION[asset]);
-    const totalPositionSize = flashloan * leverage;
-    const roundedHumanReadableQuantity =
-      Math.round((totalPositionSize / parseFloat(price)) * r) / r;
-    return this.getFlash1QuantizedQuantity(
-      asset,
-      roundedHumanReadableQuantity.toFixed(ASSET_RESOLUTION[asset])
-    );
-  }
-
-  private getHumanReadableQuantity(
-    asset: SyntheticAsset,
-    userCollateral: number,
-    leverage: number,
-    price: string
-  ): string {
-    const r = Math.pow(10, ASSET_RESOLUTION[asset]);
-    const totalPositionSize = userCollateral * leverage;
-    const roundedHumanReadableQuantity =
-      Math.round((totalPositionSize / parseFloat(price)) * r) / r;
-    return this.getFlash1QuantizedQuantity(
-      asset,
-      roundedHumanReadableQuantity.toFixed(ASSET_RESOLUTION[asset])
-    );
-  }
-
-  private getFlash1QuantizedQuantity(
-    asset: SyntheticAsset,
-    quantity: string
-  ): string {
-    const contractSize =
-      FLASH1_CONTRACT_SIZE[REVERSE_SYNTHETIC_ASSET_MAP[asset]];
-    const contractResolution = -Math.log10(contractSize);
-    const internallyQuantized = Math.floor(parseFloat(quantity) / contractSize);
-    return (internallyQuantized * contractSize).toFixed(contractResolution);
   }
 
   // ============ Signing ============
