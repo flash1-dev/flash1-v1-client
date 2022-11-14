@@ -758,6 +758,7 @@ export default class Private {
         expirationIsoTimestamp: params.expiration,
         clientId,
         positionId: this.defaultPositionId,
+        ethAddress: params.ethAddress,
       };
       const starkWithdrawal = SignableWithdrawal.fromWithdrawal(
         withdrawalToSign,
