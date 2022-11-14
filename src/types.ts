@@ -216,6 +216,7 @@ export interface ApiWithdrawal extends ApiStarkwareSigned {
   amount: string;
   asset: TradableAsset;
   clientId: string;
+  ethAddress: string;
 }
 
 export interface ApiTransfer extends ApiStarkwareSigned {
