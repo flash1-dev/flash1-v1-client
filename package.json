@@ -27,7 +27,7 @@
   "license": "Apache-2.0",
   "dependencies": {
     "@flash1-exchange/starkex-eth": "^0.2.2",
-    "@flash1-exchange/starkex-lib": "^1.2.5",
+    "@flash1-exchange/starkex-lib": "^1.2.6",
     "axios": "^0.21.1",
     "bignumber.js": "9.0.1",
     "bn.js": "5.2.1",

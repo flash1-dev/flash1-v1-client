@@ -1410,10 +1410,10 @@
     ethers "^5.6.9"
     hash.js "^1.1.7"
 
-"@flash1-exchange/starkex-lib@^1.2.5":
-  version "1.2.5"
-  resolved "https://registry.yarnpkg.com/@flash1-exchange/starkex-lib/-/starkex-lib-1.2.5.tgz#a1ffa6224bb228dd19bf2536a3d3995a5b5de1a4"
-  integrity sha512-cCvsPKAWZbNRV+qzEkV+WbjAbpc+uwhktdzDYVypCQbr+Vfvz7Q7lN2ojd9ha6XdhIlL8WlUCXRwyMcOlXcXng==
+"@flash1-exchange/starkex-lib@^1.2.6":
+  version "1.2.6"
+  resolved "https://registry.yarnpkg.com/@flash1-exchange/starkex-lib/-/starkex-lib-1.2.6.tgz#a20677405cb469724c2088163954645ae3a0d68d"
+  integrity sha512-bAJy2TC6m12gPBUAMDEDpVsvn+xzKw/YKklJCxpjdAOcKbLlBM4O5sxC1Vj1N2s2iUfKNtT7fvQfv+dDzNf/IQ==
   dependencies:
     big.js "6.0.3"
     bigint-buffer "^1.1.5"
