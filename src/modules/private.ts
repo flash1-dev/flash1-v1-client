@@ -5,6 +5,7 @@ import {
   SignableOrder,
   SignableWithdrawal,
   SignableTransfer,
+  SignableRegistration,
   TransferParams,
   StarkwareOrderSide,
   SYNTHETIC_ASSET_MAP,
@@ -158,6 +159,22 @@ export default class Private {
     return this._get('registration', {
       ...genericParams,
     });
+  }
+
+  /**
+   * @description get the signature needed to perform an L1 user registration
+   */
+  async getL1RegistrationSignature(
+    ethAddress: string
+  ): Promise<{ signature: string }> {
+    const r = new SignableRegistration(
+      {
+        ethKey: ethAddress,
+        starkKey: this.starkKeyPair.publicKey,
+      },
+      this.networkId
+    );
+    return { signature: await r.sign(this.starkKeyPair) };
   }
 
   /**
