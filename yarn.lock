@@ -1420,10 +1420,10 @@
     "@ethersproject/properties" "^5.7.0"
     "@ethersproject/strings" "^5.7.0"
 
-"@flash1-exchange/starkex-eth@^0.2.3":
-  version "0.2.3"
-  resolved "https://registry.yarnpkg.com/@flash1-exchange/starkex-eth/-/starkex-eth-0.2.3.tgz#56949e2390c9852448b4ba866b5195f433ead0b1"
-  integrity sha512-Y5/DxFcZWL/1KUOBUZN2hW7kcg8Cq7fYZBM5UwQnLv7kCqQhQ20huURq4TRw+vrFb4rZRripceb3D7sCKn+zCA==
+"@flash1-exchange/starkex-eth@^0.2.4":
+  version "0.2.4"
+  resolved "https://registry.yarnpkg.com/@flash1-exchange/starkex-eth/-/starkex-eth-0.2.4.tgz#85d978a4923f98cf8677ad6a98fd1e096d42750b"
+  integrity sha512-KPPaz50F1G7TfUEdjZlTvwPSrA9UTW1uzMtf3T5IDApgB9S+hI8+AXVZimP7Z7Jv2enQs9kgc5XBlGa1txeB7w==
   dependencies:
     "@ethersproject/abi" "^5.0.0"
     "@ethersproject/bytes" "^5.0.0"
