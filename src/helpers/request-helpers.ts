@@ -38,7 +38,9 @@ export function generateRandomClientId() {
 export function getDefaultVaultId(starkPublicKey: string) {
   const hash = cryptoJS.algo.SHA256.create();
   const vaultIdHex = hash
-    .update(cryptoJS.enc.Hex.parse(stripHexPrefix(starkPublicKey)))
+    .update(
+      cryptoJS.enc.Hex.parse(stripHexPrefix(starkPublicKey.toLowerCase()))
+    )
     .finalize()
     .toString(cryptoJS.enc.Hex);
   return hexToBn(vaultIdHex).mod(MAX_VAULT_ID).toString();
