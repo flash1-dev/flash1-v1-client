@@ -47,6 +47,7 @@ import {
 } from '../types';
 import Clock from './clock';
 import * as flashloanHelpers from '../helpers/flashloan-helpers';
+import { apiOrderToStarkexOrder } from '../helpers/order-helpers';
 
 // TODO: Figure out if we can get rid of this.
 const METHOD_ENUM_MAP: Record<RequestMethod, ApiMethod> = {
@@ -465,16 +466,12 @@ export default class Private {
         );
       }
 
-      const orderToSign: OrderWithClientId = {
-        humanSize: params.quantity,
-        humanPrice: params.price,
-        limitFee: params.limitFee,
-        market: params.instrument,
-        side: params.side,
-        expirationIsoTimestamp: params.expiration,
-        positionId: this.defaultPositionId,
-        clientId,
-      };
+      const orderToSign = apiOrderToStarkexOrder(
+        params,
+        this.defaultPositionId,
+        clientId
+      );
+
       const starkOrder = SignableOrder.fromOrder(orderToSign, this.networkId);
       signature = await starkOrder.sign(this.starkKeyPair);
     }
@@ -544,16 +541,11 @@ export default class Private {
         );
       }
 
-      const orderToSign: OrderWithClientId = {
-        humanSize: params.quantity,
-        humanPrice: params.price,
-        limitFee: params.limitFee,
-        market: params.instrument,
-        side: params.side,
-        expirationIsoTimestamp: params.expiration,
-        positionId: this.defaultPositionId,
-        clientId: clientId,
-      };
+      const orderToSign = apiOrderToStarkexOrder(
+        params,
+        this.defaultPositionId,
+        clientId
+      );
 
       const starkOrder = SignableOrder.fromOrder(orderToSign, this.networkId);
       const closingStamp = starkOrder.toStarkware().expirationEpochHours;
@@ -651,9 +643,11 @@ export default class Private {
    *
    * @param orderId of the order being canceled
    */
-  async starkexTestPlan(
-    body: any
-  ): Promise<{ cancelOrder: OrderResponseObject }> {
+  async starkexTestPlan(body: {
+    ordersToMatch: ApiOrder[];
+    starkKeys: string[];
+    fees: number[];
+  }): Promise<{ cancelOrder: OrderResponseObject }> {
     return this.post(`starkex-test-plan`, body);
   }
 

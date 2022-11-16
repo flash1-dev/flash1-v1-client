@@ -54,7 +54,7 @@ export const userC: User = {
   },
 };
 
-export const getClient = async (user: User): Flash1Client => {
+export const getClient = async (user: User): Promise<Flash1Client> => {
   const wallet = new ethers.Wallet(user.ethereum.privateKey);
   const options: ClientOptions = {
     networkId: 5,
@@ -65,9 +65,15 @@ export const getClient = async (user: User): Flash1Client => {
       '02b8fd627e5b26fd9806796df56b215079821c9d412186d921055d48958e0c87',
   };
   const client = new Flash1Client('http://localhost:8080', options);
+  const apiCreds = await client.onboarding.recoverDefaultApiCredentials(
+    user.ethereum.publicKey
+  );
+  client.apiKeyCredentials = apiCreds;
   const starkKeyPairs = await client.onboarding.deriveStarkKey(
     user.ethereum.publicKey
   );
   client.starkPrivateKey = starkKeyPairs;
   return client;
 };
+
+export const NETWORK_ID = 5;
