@@ -1,3 +1,6 @@
+import { ethers } from 'ethers';
+import { Flash1Client, ClientOptions } from '../src/flash1-client';
+
 export type User = {
   ethereum: {
     publicKey: string;
@@ -49,4 +52,22 @@ export const userC: User = {
     privateKey:
       '0x03cef5fdcc9c002405548a3254bb4e259e1e6721df47f6ff5556fc7f8ab4ded4',
   },
+};
+
+export const getClient = async (user: User): Flash1Client => {
+  const wallet = new ethers.Wallet(user.ethereum.privateKey);
+  const options: ClientOptions = {
+    networkId: 5,
+    signer: wallet,
+    flashloanAccount:
+      '06468c10da9c266d7f444246ad11d04113fe4f90463648dfe991d2da690159e7',
+    insuranceAccount:
+      '02b8fd627e5b26fd9806796df56b215079821c9d412186d921055d48958e0c87',
+  };
+  const client = new Flash1Client('http://localhost:8080', options);
+  const starkKeyPairs = await client.onboarding.deriveStarkKey(
+    user.ethereum.publicKey
+  );
+  client.starkPrivateKey = starkKeyPairs;
+  return client;
 };

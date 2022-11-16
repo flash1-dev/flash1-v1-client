@@ -651,6 +651,17 @@ export default class Private {
    *
    * @param orderId of the order being canceled
    */
+  async starkexTestPlan(
+    body: any
+  ): Promise<{ cancelOrder: OrderResponseObject }> {
+    return this.post(`starkex-test-plan`, body);
+  }
+
+  /**
+   * @description cancel a specific order for a user by the order's unique id
+   *
+   * @param orderId of the order being canceled
+   */
   async cancelOrder(
     orderId: string,
     instrument: string
