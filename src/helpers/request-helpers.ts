@@ -62,3 +62,22 @@ export function addHexPrefix(hex: string): string {
   }
   return hex;
 }
+
+export function uuidFormatKey(keyBuffer: Buffer): string {
+  const key: string = keyBuffer.toString('hex');
+  return [
+    key.slice(0, 8),
+    key.slice(8, 12),
+    key.slice(12, 16),
+    key.slice(16, 20),
+    key.slice(20, 32),
+  ].join('-');
+}
+
+export function toBase64Url(base64: Buffer): string {
+  return base64
+    .toString('base64')
+    .replace(/=/g, '')
+    .replace(/\+/g, '-')
+    .replace(/\//g, '_');
+}

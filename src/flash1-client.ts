@@ -6,6 +6,7 @@ import Private from './modules/private';
 import Public from './modules/public';
 import { generateStarkKeyPairsFromPrivate } from './eth-signing/helpers';
 import { ApiKeyCredentials, Signer, KeyPair } from './types';
+import SignUp from './modules/signup';
 
 export interface ClientOptions {
   apiTimeout?: number;
@@ -38,6 +39,7 @@ export class Flash1Client {
   private _private?: Private;
   private _ethPrivate?: EthPrivate;
   private _onboarding?: Onboarding;
+  private _signup?: SignUp;
   private _eth?: Flash1Eth;
 
   constructor(host: string, options: ClientOptions = {}) {
@@ -136,6 +138,16 @@ export class Flash1Client {
       }
     }
     return this._onboarding;
+  }
+
+  /**
+   * Get the signup module, signs up / in a user for the centralized backend
+   * */
+  get signup(): SignUp {
+    if (!this._signup) {
+      return new SignUp(this.host);
+    }
+    return this._signup;
   }
 
   /**

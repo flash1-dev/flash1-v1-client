@@ -8,7 +8,11 @@ import {
   stripHexPrefix,
   generateStarkKeyPairsFromPrivate,
 } from '../eth-signing/helpers';
-import { keccak256Buffer } from '../helpers/request-helpers';
+import {
+  keccak256Buffer,
+  toBase64Url,
+  uuidFormatKey,
+} from '../helpers/request-helpers';
 import { RequestMethod, axiosRequest } from '../lib/axios';
 import {
   AccountResponseObject,
@@ -21,6 +25,10 @@ import {
   UserResponseObject,
   Signer,
 } from '../types';
+
+/*
+  Handles wallet registration -> for decentralized backend
+*/
 
 const KEY_DERIVATION_SUPPORTED_SIGNING_METHODS: SigningMethod[] = [
   SigningMethod.TypedData,
@@ -204,23 +212,4 @@ export default class Onboarding {
       passphrase: toBase64Url(passphrase),
     };
   }
-}
-
-function uuidFormatKey(keyBuffer: Buffer): string {
-  const key: string = keyBuffer.toString('hex');
-  return [
-    key.slice(0, 8),
-    key.slice(8, 12),
-    key.slice(12, 16),
-    key.slice(16, 20),
-    key.slice(20, 32),
-  ].join('-');
-}
-
-function toBase64Url(base64: Buffer): string {
-  return base64
-    .toString('base64')
-    .replace(/=/g, '')
-    .replace(/\+/g, '-')
-    .replace(/\//g, '_');
 }
