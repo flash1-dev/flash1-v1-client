@@ -21,7 +21,7 @@ export default class SignUp {
   // ============ Request Helpers ============
 
   protected async post(endpoint: string, data: {}): Promise<Data> {
-    const url = `/api/v1/private/${endpoint}`;
+    const url = `/api/v1/public/${endpoint}`;
     return axiosRequest({
       url: `${this.host}${url}`,
       method: RequestMethod.POST,
