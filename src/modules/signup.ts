@@ -56,8 +56,7 @@ export default class SignUp {
     country?: ISO31661ALPHA2;
   }): Promise<{
     apiKey: ApiKeyCredentials;
-    user: UserResponseObject;
-    account: AccountResponseObject;
+    accreditedInvestor: boolean;
   }> {
     return this.post('signup', params);
   }
@@ -72,6 +71,7 @@ export default class SignUp {
    */
   async signIn(params: { email: string; password: string }): Promise<{
     apiKey: ApiKeyCredentials;
+    accreditedInvestor: boolean;
   }> {
     return this.post('signin', params);
   }
