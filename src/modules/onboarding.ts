@@ -210,7 +210,6 @@ export default class Onboarding {
       secret: toBase64Url(secret),
       key: uuidFormatKey(key),
       passphrase: toBase64Url(passphrase),
-      validUntil: 9999999999999,
     };
   }
 }
