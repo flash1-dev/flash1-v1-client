@@ -106,7 +106,7 @@ export default class Private {
   ): Promise<Data> {
     const requestPath = `/api/v1/private/${endpoint}`;
     const isoTimestamp: ISO8601 = this.clock.getAdjustedIsoString();
-    const headers = {
+    let headers = {
       'FLASH1-SIGNATURE': this.sign({
         requestPath,
         method,
@@ -117,6 +117,14 @@ export default class Private {
       'FLASH1-TIMESTAMP': isoTimestamp,
       'FLASH1-PASSPHRASE': this.apiKeyCredentials.passphrase,
     };
+    if (this.apiKeyCredentials.validUntil !== undefined) {
+      const newHeader = {
+        ...headers,
+        'KEY-VALID-UNTIL': this.apiKeyCredentials.validUntil,
+      };
+      headers = newHeader;
+    }
+
     return axiosRequest({
       url: `${this.host}${requestPath}`,
       method,
