@@ -124,7 +124,6 @@ export default class Private {
       'FLASH1-API-KEY': this.apiKeyCredentials.key,
       'FLASH1-TIMESTAMP': isoTimestamp,
       'FLASH1-PASSPHRASE': this.apiKeyCredentials.passphrase,
-      'KEY-VALID-UNTIL': this.apiKeyCredentials.validUntil,
     };
 
     let signature = '';
