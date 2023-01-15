@@ -454,11 +454,11 @@ export default class Private {
     const clientId = generateRandomClientId();
     let signature: string | undefined = params.signature;
     if (!signature) {
-      if (!this.starkKeyPair) {
-        throw new Error(
-          'Order is not signed and client was not initialized with starkPrivateKey'
-        );
-      }
+      // if (!this.starkKeyPair) {
+      //   throw new Error(
+      //     'Order is not signed and client was not initialized with starkPrivateKey'
+      //   );
+      // }
       if (!params.quantity) {
         params.quantity = flashloanHelpers.getHumanReadableQuantity(
           SYNTHETIC_ASSET_MAP[params.instrument],
@@ -473,18 +473,21 @@ export default class Private {
         );
       }
 
-      const orderToSign: OrderWithClientId = {
-        humanSize: params.quantity,
-        humanPrice: params.price,
-        limitFee: params.limitFee,
-        market: params.instrument,
-        side: params.side,
-        expirationIsoTimestamp: params.expiration,
-        positionId: this.defaultPositionId,
-        clientId,
-      };
-      const starkOrder = SignableOrder.fromOrder(orderToSign, this.networkId);
-      signature = await starkOrder.sign(this.starkKeyPair);
+      if (this.starkKeyPair) {
+        const orderToSign: OrderWithClientId = {
+          humanSize: params.quantity,
+          humanPrice: params.price,
+          limitFee: params.limitFee,
+          market: params.instrument,
+          side: params.side,
+          expirationIsoTimestamp: params.expiration,
+          positionId: this.defaultPositionId,
+          clientId,
+        };
+
+        const starkOrder = SignableOrder.fromOrder(orderToSign, this.networkId);
+        signature = await starkOrder.sign(this.starkKeyPair);
+      }
     }
 
     const order: ApiOrder = {
@@ -532,11 +535,11 @@ export default class Private {
     let closingOrderSignature: string | undefined =
       params.closingOrderSignature;
     if (!signature) {
-      if (!this.starkKeyPair) {
-        throw new Error(
-          'Order is not signed and client was not initialized with starkPrivateKey'
-        );
-      }
+      // if (!this.starkKeyPair) {
+      //   throw new Error(
+      //     'Order is not signed and client was not initialized with starkPrivateKey'
+      //   );
+      // }
 
       if (!params.quantity) {
         params.quantity = flashloanHelpers.getHumanReadableQuantityForFlashLoan(
@@ -552,94 +555,94 @@ export default class Private {
         );
       }
 
-      const orderToSign: OrderWithClientId = {
-        humanSize: params.quantity,
-        humanPrice: params.price,
-        limitFee: params.limitFee,
-        market: params.instrument,
-        side: params.side,
-        expirationIsoTimestamp: params.expiration,
-        positionId: this.defaultPositionId,
-        clientId: clientId,
-      };
+      if (this.starkKeyPair) {
+        const orderToSign: OrderWithClientId = {
+          humanSize: params.quantity,
+          humanPrice: params.price,
+          limitFee: params.limitFee,
+          market: params.instrument,
+          side: params.side,
+          expirationIsoTimestamp: params.expiration,
+          positionId: this.defaultPositionId,
+          clientId: clientId,
+        };
 
-      const starkOrder = SignableOrder.fromOrder(orderToSign, this.networkId);
-      const closingStamp = starkOrder.toStarkware().expirationEpochHours;
+        const starkOrder = SignableOrder.fromOrder(orderToSign, this.networkId);
+        const closingStamp = starkOrder.toStarkware().expirationEpochHours;
 
-      const flashLoanTransferToSign: TransferParams = {
-        senderPositionId: this.defaultPositionId,
-        receiverPositionId: getDefaultVaultId(this.flashloanAccount),
-        receiverPublicKey: this.flashloanAccount,
-        humanAmount: flashloanHelpers.getFlashloanPriceWithInterest(
-          params.flashloan
-        ),
-        clientId: flashloanHelpers.getFlashLoanReturnTransferSuffix(clientId),
-        expirationIsoTimestamp: params.expiration,
-      };
-      const flashLoanTransferOrder = SignableTransfer.fromTransfer(
-        flashLoanTransferToSign,
-        this.networkId
-      );
-      flashLoanTransferOrder.toStarkware().expirationEpochHours = closingStamp;
-      const insuranceTransferToSign: TransferParams = {
-        senderPositionId: this.defaultPositionId,
-        receiverPositionId: getDefaultVaultId(this.insuranceAccount),
-        receiverPublicKey: this.insuranceAccount,
-        humanAmount: flashloanHelpers.getInsurancePremium(params.flashloan),
-        clientId: flashloanHelpers.getInsurancePremiumTransferSuffix(clientId),
-        expirationIsoTimestamp: params.expiration,
-      };
-      const insuranceTransferOrder = SignableTransfer.fromTransfer(
-        insuranceTransferToSign,
-        this.networkId
-      );
-      insuranceTransferOrder.toStarkware().expirationEpochHours = closingStamp;
-      const closingOrderToSign: OrderWithClientId = {
-        humanSize: params.quantity,
-        humanPrice: flashloanHelpers.getClosingOrderPrice(
+        const flashLoanTransferToSign: TransferParams = {
+          senderPositionId: this.defaultPositionId,
+          receiverPositionId: getDefaultVaultId(this.flashloanAccount),
+          receiverPublicKey: this.flashloanAccount,
+          humanAmount: flashloanHelpers.getFlashloanPriceWithInterest(
+            params.flashloan
+          ),
+          clientId: flashloanHelpers.getFlashLoanReturnTransferSuffix(clientId),
+          expirationIsoTimestamp: params.expiration,
+        };
+        const flashLoanTransferOrder = SignableTransfer.fromTransfer(
+          flashLoanTransferToSign,
+          this.networkId
+        );
+        flashLoanTransferOrder.toStarkware().expirationEpochHours =
+          closingStamp;
+        const insuranceTransferToSign: TransferParams = {
+          senderPositionId: this.defaultPositionId,
+          receiverPositionId: getDefaultVaultId(this.insuranceAccount),
+          receiverPublicKey: this.insuranceAccount,
+          humanAmount: flashloanHelpers.getInsurancePremium(params.flashloan),
+          clientId:
+            flashloanHelpers.getInsurancePremiumTransferSuffix(clientId),
+          expirationIsoTimestamp: params.expiration,
+        };
+        const insuranceTransferOrder = SignableTransfer.fromTransfer(
+          insuranceTransferToSign,
+          this.networkId
+        );
+        insuranceTransferOrder.toStarkware().expirationEpochHours =
+          closingStamp;
+        const closingOrderToSign: OrderWithClientId = {
+          humanSize: params.quantity,
+          humanPrice: flashloanHelpers.getClosingOrderPrice(
+            params.side,
+            params.price
+          ),
+          limitFee: params.limitFee,
+          market: params.instrument,
+          side:
+            params.side === StarkwareOrderSide.BUY
+              ? StarkwareOrderSide.SELL
+              : StarkwareOrderSide.BUY,
+          expirationIsoTimestamp: params.expiration,
+          positionId: this.defaultPositionId,
+          clientId: flashloanHelpers.getClosingOrderSuffix(clientId),
+        };
+        const closingOrder = SignableOrder.fromOrder(
+          closingOrderToSign,
+          this.networkId
+        );
+        const cc = starkOrder.toStarkware().quantumsAmountCollateral;
+        const closingAmount = flashloanHelpers.getClosingOrderCollateralAmount(
           params.side,
-          params.price
-        ),
-        limitFee: params.limitFee,
-        market: params.instrument,
-        side:
-          params.side === StarkwareOrderSide.BUY
-            ? StarkwareOrderSide.SELL
-            : StarkwareOrderSide.BUY,
-        expirationIsoTimestamp: params.expiration,
-        positionId: this.defaultPositionId,
-        clientId: flashloanHelpers.getClosingOrderSuffix(clientId),
-      };
-      const closingOrder = SignableOrder.fromOrder(
-        closingOrderToSign,
-        this.networkId
-      );
-      const cc = starkOrder.toStarkware().quantumsAmountCollateral;
-      const closingAmount = flashloanHelpers.getClosingOrderCollateralAmount(
-        params.side,
-        cc
-      );
-      closingOrder.toStarkware().quantumsAmountCollateral = closingAmount;
-      closingOrder.toStarkware().quantumsAmountFee =
-        starkOrder.toStarkware().quantumsAmountFee;
-      closingOrder.toStarkware().expirationEpochHours = closingStamp;
+          cc
+        );
+        closingOrder.toStarkware().quantumsAmountCollateral = closingAmount;
+        closingOrder.toStarkware().quantumsAmountFee =
+          starkOrder.toStarkware().quantumsAmountFee;
+        closingOrder.toStarkware().expirationEpochHours = closingStamp;
 
-      [
-        signature,
-        flashloanSignature,
-        insuranceSignature,
-        closingOrderSignature,
-      ] = await Promise.all([
-        starkOrder.sign(this.starkKeyPair),
-        flashLoanTransferOrder.sign(this.starkKeyPair),
-        insuranceTransferOrder.sign(this.starkKeyPair),
-        closingOrder.sign(this.starkKeyPair),
-      ]);
-      console.log('starkOrder', starkOrder);
-      console.log('flashLoanTransferOrder', flashLoanTransferOrder);
-      console.log('insuranceTransferOrder', insuranceTransferOrder);
-      console.log('closingOrder', closingOrder);
-      console.log('params', params);
+        [
+          signature,
+          flashloanSignature,
+          insuranceSignature,
+          closingOrderSignature,
+        ] = await Promise.all([
+          starkOrder.sign(this.starkKeyPair),
+          flashLoanTransferOrder.sign(this.starkKeyPair),
+          insuranceTransferOrder.sign(this.starkKeyPair),
+          closingOrder.sign(this.starkKeyPair),
+        ]);
+      }
     }
 
     const order: ApiOrderWithFlashloan = {
