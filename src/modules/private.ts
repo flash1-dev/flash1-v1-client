@@ -121,14 +121,16 @@ export default class Private {
       data,
     };
 
+    const re = /[0-9A-Fa-f]{6}/g;
+    const prefixStrippedKey = this.apiKeyCredentials.secret.replace('0x', '');
+
     if (
       this.starkKeyPair === undefined &&
-      ecdsa.utils.isValidPrivateKey(
-        ecdsa.utils.hexToBytes(this.apiKeyCredentials.secret)
-      )
+      re.test(prefixStrippedKey) &&
+      ecdsa.utils.isValidPrivateKey(ecdsa.utils.hexToBytes(prefixStrippedKey))
     ) {
       // non-Defi mode
-      signature = this.signECDSA(signerPath);
+      signature = await this.signECDSA(signerPath);
     } else {
       signature = this.signHmac(signerPath);
     }
@@ -1124,7 +1126,7 @@ export default class Private {
     return hmac.update(base64ParsedMsg).finalize().toString(crypto.enc.Base64);
   }
 
-  signECDSA({
+  async signECDSA({
     requestPath,
     method,
     isoTimestamp,
@@ -1134,18 +1136,22 @@ export default class Private {
     method: RequestMethod;
     isoTimestamp: ISO8601;
     data?: {};
-  }): string {
+  }): Promise<string> {
     const messageString: string =
       isoTimestamp +
       METHOD_ENUM_MAP[method] +
       requestPath +
       (isEmpty(data) ? '' : JSON.stringify(data));
     const msg = Buffer.from(messageString);
-    const hashedMessage = ecdsa.utils.sha256Sync(msg);
+    const hashedMessage = await ecdsa.utils.sha256(msg);
+    let keyToSign = this.apiKeyCredentials.secret;
+    if (this.apiKeyCredentials.secret.startsWith('0x')) {
+      keyToSign = this.apiKeyCredentials.secret.replace('0x', '');
+    }
 
-    const signature = ecdsa.signSync(
+    const signature = await ecdsa.sign(
       hashedMessage,
-      ecdsa.utils.hexToBytes(this.apiKeyCredentials.secret)
+      ecdsa.utils.hexToBytes(keyToSign)
     );
 
     return ecdsa.utils.bytesToHex(signature);
