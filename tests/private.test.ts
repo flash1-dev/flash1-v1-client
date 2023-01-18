@@ -27,7 +27,7 @@ describe('Verify signature is as expected', () => {
     });
     await client.private.getApiKeys();
     expect(
-      client.private.sign({
+      client.private.signHmac({
         requestPath:
           '/v1/api-keys?ethereumAddress=0xE5714924C8C5c732F92A439075C8211eB0611aaC',
         method: RequestMethod.GET,
