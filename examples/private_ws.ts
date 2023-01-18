@@ -11,7 +11,8 @@ import { Flash1Client, ClientOptions } from '../src/flash1-client';
 import { RequestMethod } from '../src/lib/axios';
 
 const PUBLIC_KEY = '0x90F8bf6A479f320ead074411a4B0e7944Ea8c9C1';
-const PRIVATE_KEY = '0x4f3edf983ac636a65a842ce7c78d9aa706d3b113bce9c46f30d7d21715b23b1d';
+const PRIVATE_KEY =
+  '0x4f3edf983ac636a65a842ce7c78d9aa706d3b113bce9c46f30d7d21715b23b1d';
 const API_HOST = 'http://localhost:8080';
 const WS_HOST = 'ws://localhost:8080';
 const PRIVATE_WS_URI = '/api/ws/v1/private/subscribeinfo';
@@ -25,12 +26,12 @@ const PRIVATE_WS_URI = '/api/ws/v1/private/subscribeinfo';
   };
   const client = new Flash1Client(API_HOST, options);
   const apiCreds = await client.onboarding.recoverDefaultApiCredentials(
-    PUBLIC_KEY,
+    PUBLIC_KEY
   );
   client.apiKeyCredentials = apiCreds;
 
   const timestamp = new Date().toISOString();
-  const signature = client.private.sign({
+  const signature = client.private.signHmac({
     requestPath: '/api/ws/v1/private/subscribeinfo',
     method: RequestMethod.GET,
     isoTimestamp: timestamp,

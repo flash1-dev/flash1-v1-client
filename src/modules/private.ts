@@ -12,6 +12,7 @@ import {
 } from '@flash1-exchange/starkex-lib';
 import crypto from 'crypto-js';
 import isEmpty from 'lodash/isEmpty';
+import * as ecdsa from '@noble/secp256k1';
 
 import {
   generateQueryPath,
@@ -106,30 +107,52 @@ export default class Private {
   ): Promise<Data> {
     const requestPath = `/api/v1/private/${endpoint}`;
     const isoTimestamp: ISO8601 = this.clock.getAdjustedIsoString();
-    let headers = {
-      'FLASH1-SIGNATURE': this.sign({
-        requestPath,
-        method,
-        isoTimestamp,
-        data,
-      }),
+    const unsignedHeader = {
       'FLASH1-API-KEY': this.apiKeyCredentials.key,
       'FLASH1-TIMESTAMP': isoTimestamp,
       'FLASH1-PASSPHRASE': this.apiKeyCredentials.passphrase,
     };
+
+    let signature = '';
+    const signerPath = {
+      requestPath,
+      method,
+      isoTimestamp,
+      data,
+    };
+
+    const re = /[0-9A-Fa-f]{6}/g;
+    const prefixStrippedKey = this.apiKeyCredentials.secret.replace('0x', '');
+
+    if (
+      this.starkKeyPair === undefined &&
+      re.test(prefixStrippedKey) &&
+      ecdsa.utils.isValidPrivateKey(ecdsa.utils.hexToBytes(prefixStrippedKey))
+    ) {
+      // non-Defi mode
+      signature = await this.signECDSA(signerPath);
+    } else {
+      signature = this.signHmac(signerPath);
+    }
+
+    let signedHeaders = {
+      ...unsignedHeader,
+      'FLASH1-SIGNATURE': signature,
+    };
+
     if (this.apiKeyCredentials.validUntil !== undefined) {
       const newHeader = {
-        ...headers,
+        ...signedHeaders,
         'KEY-VALID-UNTIL': this.apiKeyCredentials.validUntil,
       };
-      headers = newHeader;
+      signedHeaders = newHeader;
     }
 
     return axiosRequest({
       url: `${this.host}${requestPath}`,
       method,
       data,
-      headers,
+      headers: signedHeaders,
     });
   }
 
@@ -1079,7 +1102,7 @@ export default class Private {
 
   // ============ Signing ============
 
-  sign({
+  signHmac({
     requestPath,
     method,
     isoTimestamp,
@@ -1101,5 +1124,36 @@ export default class Private {
     );
     const base64ParsedMsg = Buffer.from(messageString).toString('base64');
     return hmac.update(base64ParsedMsg).finalize().toString(crypto.enc.Base64);
+  }
+
+  async signECDSA({
+    requestPath,
+    method,
+    isoTimestamp,
+    data,
+  }: {
+    requestPath: string;
+    method: RequestMethod;
+    isoTimestamp: ISO8601;
+    data?: {};
+  }): Promise<string> {
+    const messageString: string =
+      isoTimestamp +
+      METHOD_ENUM_MAP[method] +
+      requestPath +
+      (isEmpty(data) ? '' : JSON.stringify(data));
+    const msg = Buffer.from(messageString);
+    const hashedMessage = await ecdsa.utils.sha256(msg);
+    let keyToSign = this.apiKeyCredentials.secret;
+    if (this.apiKeyCredentials.secret.startsWith('0x')) {
+      keyToSign = this.apiKeyCredentials.secret.replace('0x', '');
+    }
+
+    const signature = await ecdsa.sign(
+      hashedMessage,
+      ecdsa.utils.hexToBytes(keyToSign)
+    );
+
+    return ecdsa.utils.bytesToHex(signature);
   }
 }
