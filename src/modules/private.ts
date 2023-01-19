@@ -68,6 +68,7 @@ export default class Private {
   readonly clock: Clock;
   readonly flashloanAccount: string;
   readonly insuranceAccount: string;
+  readonly useECDSA: boolean;
 
   constructor({
     host,
@@ -89,8 +90,20 @@ export default class Private {
     this.host = host;
     this.apiKeyCredentials = apiKeyCredentials;
     this.starkKeyPair = starkPrivateKey;
+    this.useECDSA = false;
     if (this.starkKeyPair) {
       this.defaultPositionId = getDefaultVaultId(this.starkKeyPair.publicKey);
+    } else {
+      const re = /[0-9A-Fa-f]{6}/g;
+      const prefixStrippedKey = apiKeyCredentials.secret.replace('0x', '');
+
+      if (
+        re.test(prefixStrippedKey) &&
+        ecdsa.utils.isValidPrivateKey(ecdsa.utils.hexToBytes(prefixStrippedKey))
+      ) {
+        this.useECDSA = true;
+        this.apiKeyCredentials.secret = prefixStrippedKey;
+      }
     }
     this.networkId = networkId;
     this.clock = clock;
@@ -121,15 +134,7 @@ export default class Private {
       data,
     };
 
-    const re = /[0-9A-Fa-f]{6}/g;
-    const prefixStrippedKey = this.apiKeyCredentials.secret.replace('0x', '');
-
-    if (
-      this.starkKeyPair === undefined &&
-      re.test(prefixStrippedKey) &&
-      ecdsa.utils.isValidPrivateKey(ecdsa.utils.hexToBytes(prefixStrippedKey))
-    ) {
-      // non-Defi mode
+    if (this.useECDSA) {
       signature = await this.signECDSA(signerPath);
     } else {
       signature = this.signHmac(signerPath);
@@ -353,6 +358,13 @@ export default class Private {
    */
   async getPositions(): Promise<{ positions: PositionResponseObject[] }> {
     return this._get('positions', {});
+  }
+
+  /**
+   * @description sign out
+   */
+  async signOut(): Promise<{}> {
+    return this.post('signout', {});
   }
 
   // Not supported yet
