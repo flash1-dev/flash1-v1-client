@@ -2,6 +2,7 @@ import { RequestMethod, axiosRequest } from '../lib/axios';
 import {
   AccountResponseObject,
   ApiKeyCredentials,
+  UserWallet,
   Data,
   ISO31661ALPHA2,
   UserResponseObject,
@@ -56,6 +57,7 @@ export default class SignUp {
     country?: ISO31661ALPHA2;
   }): Promise<{
     apiKey: ApiKeyCredentials;
+    wallets: UserWallet;
   }> {
     return this.post('signup', params);
   }
@@ -70,6 +72,7 @@ export default class SignUp {
    */
   async signIn(params: { email: string; password: string }): Promise<{
     apiKey: ApiKeyCredentials;
+    wallets: UserWallet;
   }> {
     return this.post('signin', params);
   }

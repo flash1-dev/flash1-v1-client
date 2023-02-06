@@ -363,7 +363,7 @@ export default class Private {
   /**
    * @description sign out
    */
-  async signOut(): Promise<{}> {
+  async signOut(): Promise<any> {
     return this.post('signout', {});
   }
 

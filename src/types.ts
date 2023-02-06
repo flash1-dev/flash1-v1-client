@@ -47,6 +47,10 @@ export interface ApiKeyCredentials {
   validUntil?: number;
 }
 
+export interface UserWallet {
+  eth: string;
+}
+
 // ============ Enums ============
 
 export type ListedMarket = Flash1Market;
