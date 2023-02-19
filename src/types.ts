@@ -1,6 +1,4 @@
 import {
-  AcceptedCollateral,
-  CollateralNetworks,
   Flash1Asset,
   Flash1Market,
   StarkwareOrderSide,
@@ -64,6 +62,14 @@ export const OrderSide = StarkwareOrderSide;
 
 export enum TransferAsset {
   USDC = 'USDC',
+}
+
+export enum AcceptedCollateral {
+  USDT = 'USDT',
+}
+export enum CollateralNetworks {
+  ERC20 = 'ERC20',
+  TRC20 = 'TRC20',
 }
 
 export enum MarketStatisticDay {
