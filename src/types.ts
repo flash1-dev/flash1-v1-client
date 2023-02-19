@@ -64,6 +64,14 @@ export enum TransferAsset {
   USDC = 'USDC',
 }
 
+export enum AcceptedCollateral {
+  USDT = 'USDT',
+}
+export enum CollateralNetworks {
+  ERC20 = 'ERC20',
+  TRC20 = 'TRC20',
+}
+
 export enum MarketStatisticDay {
   ONE = '1',
   SEVEN = '7',
@@ -292,6 +300,13 @@ export interface MarketStatisticResponseObject {
   quoteVolume: string;
   type: string;
   fees: string;
+}
+
+export interface WithdrawalRequest {
+  assetType: AcceptedCollateral;
+  accountType: CollateralNetworks;
+  amount: number;
+  destination: string;
 }
 
 export interface OrderResponseObject {
