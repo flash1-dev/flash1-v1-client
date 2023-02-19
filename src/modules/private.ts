@@ -9,6 +9,7 @@ import {
   TransferParams,
   StarkwareOrderSide,
   SYNTHETIC_ASSET_MAP,
+  AcceptedCollateral,
 } from '@flash1-exchange/starkex-lib';
 import crypto from 'crypto-js';
 import isEmpty from 'lodash/isEmpty';
@@ -48,6 +49,7 @@ import {
   WithdrawalHistoryObject,
   DepositHistoryObject,
   ReferralData,
+  WithdrawalRequest,
 } from '../types';
 import Clock from './clock';
 import * as flashloanHelpers from '../helpers/flashloan-helpers';
@@ -493,6 +495,20 @@ export default class Private {
    */
   async getOpenPositions(): Promise<{ order: OrderResponseObject[] }> {
     return this._get('positions', {});
+  }
+
+  /**
+   * @description get an order by a clientId
+   *
+   * @param clientId of the order
+   */
+  async submitWithdrawal(
+    params: WithdrawalRequest
+  ): Promise<{ message: string }> {
+    if (params.assetType !== AcceptedCollateral.USDT) {
+      throw new Error('Submitted asset type is not withdrawable');
+    }
+    return this.post('usdt-withdraw', params);
   }
 
   /**
