@@ -9,7 +9,6 @@ import {
   TransferParams,
   StarkwareOrderSide,
   SYNTHETIC_ASSET_MAP,
-  AcceptedCollateral,
 } from '@flash1-exchange/starkex-lib';
 import crypto from 'crypto-js';
 import isEmpty from 'lodash/isEmpty';
