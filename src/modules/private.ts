@@ -49,6 +49,7 @@ import {
   DepositHistoryObject,
   ReferralData,
   WithdrawalRequest,
+  AcceptedCollateral,
 } from '../types';
 import Clock from './clock';
 import * as flashloanHelpers from '../helpers/flashloan-helpers';
