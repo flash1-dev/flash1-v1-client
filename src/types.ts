@@ -1,4 +1,6 @@
 import {
+  AcceptedCollateral,
+  CollateralNetworks,
   Flash1Asset,
   Flash1Market,
   StarkwareOrderSide,
@@ -292,6 +294,13 @@ export interface MarketStatisticResponseObject {
   quoteVolume: string;
   type: string;
   fees: string;
+}
+
+export interface WithdrawalRequest {
+  assetType: AcceptedCollateral;
+  accountType: CollateralNetworks;
+  amount: number;
+  destination: string;
 }
 
 export interface OrderResponseObject {
