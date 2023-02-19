@@ -45,6 +45,9 @@ import {
   ProfilePrivateResponseObject,
   ApiOrderWithFlashloan,
   OrderResponseObject,
+  WithdrawalHistoryObject,
+  DepositHistoryObject,
+  ReferralData,
 } from '../types';
 import Clock from './clock';
 import * as flashloanHelpers from '../helpers/flashloan-helpers';
@@ -307,6 +310,33 @@ export default class Private {
     genericParams: GenericParams = {}
   ): Promise<{ accounts: AccountResponseObject[] }> {
     return this._get('accounts', { ...genericParams });
+  }
+
+  /**
+   * @description get all accounts associated with an ethereumAddress
+   */
+  async getWithdrawalHistory(
+    genericParams: GenericParams = {}
+  ): Promise<{ data: WithdrawalHistoryObject[] }> {
+    return this.post('withdrawal-history', { ...genericParams });
+  }
+
+  /**
+   * @description get all accounts associated with an ethereumAddress
+   */
+  async getDepositHistory(
+    genericParams: GenericParams = {}
+  ): Promise<{ data: DepositHistoryObject[] }> {
+    return this.post('deposit-history', { ...genericParams });
+  }
+
+  /**
+   * @description get all accounts associated with an ethereumAddress
+   */
+  async getReferralData(
+    genericParams: GenericParams = {}
+  ): Promise<{ data: ReferralData[] }> {
+    return this.post('referral-data', { ...genericParams });
   }
 
   // Not yet supported

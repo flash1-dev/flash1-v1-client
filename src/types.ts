@@ -371,10 +371,46 @@ export interface UserResponseObject {
   referredByAffiliateLink: string | null;
   isSharingUsername: boolean | null;
   isSharingAddress: boolean | null;
-  dydxTokenBalance: string;
-  stakedDydxTokenBalance: string;
   isEmailVerified: boolean;
   country: ISO31661ALPHA2 | null;
+}
+
+export interface DepositHistoryObject {
+  txHash: string;
+  asset: string;
+  value: number;
+  successful: boolean;
+  lastProcessedTime: string;
+}
+
+export interface WithdrawalHistoryObject {
+  txHash: string;
+  to: string;
+  asset: string;
+  value: number;
+  fee: number;
+  successful: boolean;
+  processedTime: string;
+}
+
+export interface ReferralData {
+  referenceID: string;
+  rank: number;
+  careerEarning: number;
+  totalReferral: number;
+  thisWeekEstimate: number;
+  thisWeekReferral: number;
+  availableSpots: number;
+  paymentData: ReferralPayment[];
+}
+
+export interface ReferralPayment {
+  referenceID: string;
+  totalAmount: number;
+  directReferral: number;
+  networkReferral: number;
+  timestamp: string;
+  currency: string;
 }
 
 export interface AccountResponseObject {
