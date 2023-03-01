@@ -341,6 +341,15 @@ export default class Private {
     return this.post('referral-data', { ...genericParams });
   }
 
+  /**
+   * @description get all accounts associated with an ethereumAddress
+   */
+  async generateReferralCode(
+    genericParams: GenericParams = {}
+  ): Promise<{ data: string }> {
+    return this.post('generate-referral-code', { ...genericParams });
+  }
+
   // Not yet supported
   /**
    * @description get leaderboard pnl for period
