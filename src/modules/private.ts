@@ -346,7 +346,7 @@ export default class Private {
    */
   async generateReferralCode(
     genericParams: GenericParams = {}
-  ): Promise<{ data: string }> {
+  ): Promise<{ data: ReferralData }> {
     return this.post('generate-referral-code', { ...genericParams });
   }
 
