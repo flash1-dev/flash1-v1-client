@@ -337,7 +337,7 @@ export default class Private {
    */
   async getReferralData(
     genericParams: GenericParams = {}
-  ): Promise<{ data: ReferralData[] }> {
+  ): Promise<{ data: ReferralData }> {
     return this.post('referral-data', { ...genericParams });
   }
 
