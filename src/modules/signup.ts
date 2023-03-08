@@ -58,6 +58,7 @@ export default class SignUp {
   }): Promise<{
     apiKey: ApiKeyCredentials;
     wallets: UserWallet;
+    referenceID: string;
   }> {
     return this.post('signup', params);
   }
@@ -73,6 +74,7 @@ export default class SignUp {
   async signIn(params: { email: string; password: string }): Promise<{
     apiKey: ApiKeyCredentials;
     wallets: UserWallet;
+    referenceID: string;
   }> {
     return this.post('signin', params);
   }
