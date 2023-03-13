@@ -223,6 +223,8 @@ export interface ApiOrderWithFlashloan extends ApiOrder {
   flashloanSignature: string;
   insuranceSignature: string;
   closingOrderSignature: string;
+  maxProfitLine: number;
+  liquidationLine: number;
 }
 
 export interface ApiWithdrawal extends ApiStarkwareSigned {
