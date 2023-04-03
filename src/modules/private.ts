@@ -50,6 +50,8 @@ import {
   ReferralData,
   WithdrawalRequest,
   AcceptedCollateral,
+  ReferralNetwork,
+  NetworkUserData,
 } from '../types';
 import Clock from './clock';
 import * as flashloanHelpers from '../helpers/flashloan-helpers';
@@ -348,6 +350,13 @@ export default class Private {
     genericParams: GenericParams = {}
   ): Promise<{ data: ReferralData }> {
     return this.post('generate-referral-code', { ...genericParams });
+  }
+
+  /**
+   * @description get all accounts associated with an ethereumAddress
+   */
+  async getNetworkUserData(email: string): Promise<{ data: NetworkUserData }> {
+    return this.post('get-network-user-data', { email });
   }
 
   // Not yet supported
