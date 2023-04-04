@@ -359,6 +359,17 @@ export default class Private {
     return this.post('get-network-user-data', { email });
   }
 
+  /**
+   * @description get all accounts associated with an ethereumAddress
+   */
+  async cashFillUpBalance(
+    email: string,
+    cashAmount: number,
+    currency: string
+  ): Promise<{ data: NetworkUserData }> {
+    return this.post('cash-fill-up-balance', { email, cashAmount, currency });
+  }
+
   // Not yet supported
   /**
    * @description get leaderboard pnl for period
