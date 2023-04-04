@@ -59,6 +59,7 @@ export default class SignUp {
     apiKey: ApiKeyCredentials;
     wallets: UserWallet;
     referenceID: string;
+    referralCode: string;
   }> {
     return this.post('signup', params);
   }
@@ -75,6 +76,7 @@ export default class SignUp {
     apiKey: ApiKeyCredentials;
     wallets: UserWallet;
     referenceID: string;
+    referralCode: string;
   }> {
     return this.post('signin', params);
   }
