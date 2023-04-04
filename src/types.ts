@@ -417,6 +417,7 @@ export interface ReferralData {
   totalReferral: number;
   thisWeekEstimate: number;
   thisWeekReferral: number;
+  masterAccount: boolean;
   paymentData: ReferralPayment[];
   networks: ReferralNetwork[];
 }
